@@ -1,0 +1,16 @@
+/* Dashboard Éducateur spécifique */
+.educateur-stats .stat-card:first-child {
+    border-left-color: var(--primary-color);
+}
+
+.educateur-stats .stat-card:nth-child(2) {
+    border-left-color: var(--success-color);
+}
+
+.educateur-stats .stat-card:nth-child(3) {
+    border-left-color: var(--warning-color);
+}
+
+.educateur-stats .stat-card:nth-child(4) {
+    border-left-color: var(--secondary-color);
+}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Liste des Chambres</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/liste.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🏠 Liste des Chambres</h1>
+            <a th:href="@{/chambres/nouvelle}" class="btn btn-primary">
+                ➕ Nouvelle Chambre
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Barre de recherche -->
+        <div class="card search-card chambres">
+            <div class="card-body">
+                <form th:action="@{/chambres/liste}" method="get" class="search-form">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <select name="searchType" class="search-select">
+                                <option value="numero" th:selected="${searchType == 'numero'}">Numéro</option>
+                                <option value="etage" th:selected="${searchType == 'etage'}">Étage</option>
+                                <option value="type" th:selected="${searchType == 'type'}">Type</option>
+                                <option value="statut" th:selected="${searchType == 'statut'}">Statut</option>
+                                <option value="equipement" th:selected="${searchType == 'equipement'}">Équipement</option>
+                                <option value="occupant" th:selected="${searchType == 'occupant'}">Occupant</option>
+                            </select>
+                            <input type="text" 
+                                   name="search" 
+                                   class="search-input" 
+                                   placeholder="Rechercher..." 
+                                   th:value="${search}"
+                                   style="min-width: 200px;">
+                            <button type="submit" class="btn btn-primary search-btn">
+                                🔍 Rechercher
+                            </button>
+                        </div>
+                        <div th:if="${search != null}" class="search-results-info" style="margin-top: 1rem;">
+                            <span th:text="${#lists.size(chambres)} + ' chambre(s) trouvée(s)'" class="text-muted"></span>
+                            <a th:href="@{/chambres/liste}" class="btn btn-sm btn-outline" style="margin-left: 1rem;">
+                                ❌ Effacer la recherche
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistiques horizontales en petits carrés -->
+        <div class="stats-horizontal">
+            <div class="stat-square total">
+                <span class="stat-number" th:text="${#lists.size(chambres)}"></span>
+                <span class="stat-label">Total chambres</span>
+            </div>
+            <div class="stat-square disponible">
+                <span class="stat-number" style="color: #28a745;" 
+                      th:text="${chambres.?[estDisponible() == true].size()}"></span>
+                <span class="stat-label">Disponibles</span>
+            </div>
+            <div class="stat-square pleine">
+                <span class="stat-number" style="color: #dc3545;" 
+                      th:text="${chambres.?[estPleine() == true].size()}"></span>
+                <span class="stat-label">Pleines</span>
+            </div>
+            <div class="stat-square presque-pleine">
+                <span class="stat-number" style="color: #ffc107;" 
+                      th:text="${chambres.?[nombrePlacesLibres == 1].size()}"></span>
+                <span class="stat-label">Presque pleines</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>Étage</th>
+                                <th>Type</th>
+                                <th>Capacité</th>
+                                <th>Occupants</th>
+                                <th>Occupation</th>
+                                <th>Disponibilité</th>
+                                <th>Accessible</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="chambre : ${chambres}">
+                                <td>
+                                    <strong th:text="${chambre.numero}"></strong>
+                                    <div th:if="${chambre.description}" class="text-muted" style="font-size: 0.75rem;">
+                                        <small th:text="${chambre.description}"></small>
+                                    </div>
+                                </td>
+                                <td th:text="${chambre.etage}"></td>
+                                <td>
+                                    <span class="badge badge-info" th:text="${chambre.type}"></span>
+                                </td>
+                                <td th:text="${chambre.capacite}"></td>
+                                <td>
+                                    <div class="occupants-list">
+                                        <div th:if="${#lists.isEmpty(chambre.residents)}" class="empty-state">
+                                            Aucun occupant
+                                        </div>
+                                        <div th:each="resident : ${chambre.residents}" class="occupant-item">
+                                            <div>
+                                                <span class="occupant-name" th:text="${resident.prenom + ' ' + resident.nom}"></span>
+                                                <div class="occupant-age" th:text="'(' + ${resident.age} + ' ans)'"></div>
+                                            </div>
+                                            <!-- Supprimé le lien oeil après le nom de l'occupant -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div th:with="occupation=${chambre.residents?.size() ?: 0}, 
+                                                 taux=${(chambre.residents?.size() ?: 0) / chambre.capacite * 100}">
+                                        <div style="margin-bottom: 0.25rem;">
+                                            <span th:text="${occupation + '/' + chambre.capacite}"></span>
+                                            <small class="text-muted" th:text="'(' + ${#numbers.formatDecimal(taux, 0, 0) + '%)'"></small>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" 
+                                                 th:classappend="${taux >= 80} ? 'high' : (${taux >= 50} ? 'medium' : '')"
+                                                 th:style="'width: ' + ${taux} + '%;'"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${chambre.estDisponible()}" class="badge badge-success">Disponible</span>
+                                    <span th:if="${chambre.estPleine()}" class="badge badge-danger">Pleine</span>
+                                    <span th:if="${!chambre.estDisponible() && !chambre.estPleine()}" class="badge badge-warning">Occupée</span>
+                                </td>
+                                <td>
+                                    <span th:if="${chambre.accessible}" class="badge badge-success">✅</span>
+                                    <span th:unless="${chambre.accessible}" class="badge badge-secondary">❌</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- Lien corrigé pour les détails de la chambre -->
+                                        <a th:href="@{/chambres/details/{id}(id=${chambre.id})}" 
+                                           class="btn btn-sm btn-outline" title="Voir détails">
+                                            👁️
+                                        </a>
+                                        <a th:href="@{/chambres/{id}/modifier(id=${chambre.id})}" 
+                                           class="btn btn-sm btn-primary" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <form th:action="@{/chambres/{id}/supprimer(id=${chambre.id})}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette chambre ?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(chambres)}">
+                                <td colspan="9" class="text-center text-muted">
+                                    <div th:if="${search != null}">
+                                        Aucune chambre trouvée pour votre recherche
+                                    </div>
+                                    <div th:if="${search == null}">
+                                        Aucune chambre enregistrée
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/chambres.js}"></script>
+</body>
+</html>

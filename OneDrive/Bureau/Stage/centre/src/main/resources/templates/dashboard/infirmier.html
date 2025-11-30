@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🏥 Tableau de bord - Infirmier</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Infirmier -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Tableau de bord médical</h2>
+                <div class="stats-grid infirmier-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.mesResidents}">-</div>
+                        <div class="stat-label">Mes résidents</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${stats.prescriptionsEnAttente}">-</div>
+                        <div class="stat-label">Prescriptions en attente</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number" th:text="${stats.notesAujourdhui}">-</div>
+                        <div class="stat-label">Notes aujourd'hui</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number" th:text="${stats.residentsAllergies}">-</div>
+                        <div class="stat-label">Allergies critiques</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Soins du jour</h3>
+                <div class="quick-actions">
+                    <a href="/infirmier/medicaments" class="btn btn-primary">
+                        <i>💊</i> Administrer médicaments
+                    </a>
+                    <a href="/infirmier/consultations" class="btn btn-success">
+                        <i>🩺</i> Consultations
+                    </a>
+                    <a href="/infirmier/dossiers-medicaux" class="btn btn-info">
+                        <i>📋</i> Dossiers médicaux
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+    <script th:src="@{/js/prescription.js}"></script>
+</body>
+</html>

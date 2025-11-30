@@ -1,0 +1,85 @@
+@import url('../base/variables.css');
+@import url('../base/utilities.css');
+@import url('../components/header.css');
+@import url('../components/footer.css');
+@import url('../components/cards.css');
+@import url('../components/buttons.css');
+@import url('../components/forms.css');
+@import url('../pages/dashboard.css');
+@import url('../pages/chambres/liste.css');
+@import url('../pages/chambres/details.css');
+@import url('../pages/chambres/formulaire.css');
+@import url('../pages/admin/parametres.css');
+@import url('../pages/admin/utilisateurs.css');
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #f8f9fa;
+}
+
+/* Layout principal */
+.main-content {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    min-height: calc(100vh - 200px);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.page-title {
+    font-size: var(--font-size-xxl);
+    color: var(--primary-color);
+    font-weight: 300;
+}
+
+/* Grid system */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -1rem;
+}
+
+.col {
+    flex: 1;
+    padding: 0 1rem;
+}
+
+.col-2 { flex: 0 0 50%; }
+.col-3 { flex: 0 0 33.333%; }
+.col-4 { flex: 0 0 25%; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 1rem;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+    
+    .col {
+        flex: 0 0 100%;
+}
+
+
+}

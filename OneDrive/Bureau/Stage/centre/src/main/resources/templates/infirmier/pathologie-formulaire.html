@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Formulaire Pathologie</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">
+                <span th:if="${pathologie != null}">Modifier la pathologie</span>
+                <span th:unless="${pathologie != null}">Ajouter une pathologie</span>
+            </h1>
+            <div class="header-actions">
+                <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">
+                    ← Retour au dossier médical
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="form-container">
+            <!-- Formulaire pour modification -->
+            <form th:if="${pathologie != null}" th:action="@{/infirmier/pathologies/{id}/modifier(id=${pathologie.id})}" method="post" class="medical-form">
+                
+                <!-- Champ caché pour l'ID du dossier médical -->
+                <input type="hidden" name="dossierMedicalId" th:value="${dossierId}">
+
+                <!-- Nom de la pathologie -->
+                <div class="form-group">
+                    <label for="nom" class="form-label">Nom de la pathologie *</label>
+                    <input type="text" id="nom" name="nom" th:value="${pathologie.nom}" class="form-control" placeholder="Ex: Diabète, Hypertension, Asthme..." required maxlength="100">
+                    <div class="form-hint">Nom médical de la pathologie</div>
+                </div>
+
+                <!-- Date de diagnostic -->
+                <div class="form-group">
+                    <label for="dateDiagnostic" class="form-label">Date de diagnostic</label>
+                    <input type="date" id="dateDiagnostic" name="dateDiagnostic" th:value="${pathologie.dateDiagnostic}" class="form-control">
+                    <div class="form-hint">Date à laquelle la pathologie a été diagnostiquée</div>
+                </div>
+
+                <!-- Type de pathologie -->
+                <div class="form-group">
+                    <label class="form-label">Type de pathologie</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="chronique" value="true" th:checked="${pathologie.chronique}">
+                            <span class="checkmark"></span>
+                            Pathologie chronique
+                        </label>
+                    </div>
+                    <div class="form-hint">Cochez si la pathologie est de nature chronique</div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="Ex: Description détaillée de la pathologie, historique..." maxlength="500" th:text="${pathologie.description}"></textarea>
+                    <div class="form-hint">Description complète de la pathologie</div>
+                </div>
+
+                <!-- Symptômes -->
+                <div class="form-group">
+                    <label for="symptomes" class="form-label">Symptômes</label>
+                    <textarea id="symptomes" name="symptomes" class="form-control" rows="3" placeholder="Ex: Symptômes observés, fréquence, intensité..." maxlength="500" th:text="${pathologie.symptomes}"></textarea>
+                    <div class="form-hint">Symptômes associés à cette pathologie</div>
+                </div>
+
+                <!-- Traitement -->
+                <div class="form-group">
+                    <label for="traitement" class="form-label">Traitement</label>
+                    <textarea id="traitement" name="traitement" class="form-control" rows="3" placeholder="Ex: Médicaments, thérapie, suivi médical..." maxlength="500" th:text="${pathologie.traitement}"></textarea>
+                    <div class="form-hint">Traitement prescrit ou recommandé</div>
+                </div>
+
+                <!-- Actions du formulaire -->
+                <div class="form-actions">
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">Annuler</a>
+                    <button type="submit" class="btn btn-primary">💾 Modifier la pathologie</button>
+                </div>
+            </form>
+
+            <!-- Formulaire pour ajout -->
+            <form th:unless="${pathologie != null}" th:action="@{/infirmier/pathologies/ajouter}" method="post" class="medical-form">
+                
+                <!-- Champ caché pour l'ID du dossier médical -->
+                <input type="hidden" name="dossierMedicalId" th:value="${dossierId}">
+
+                <!-- Nom de la pathologie -->
+                <div class="form-group">
+                    <label for="nom" class="form-label">Nom de la pathologie *</label>
+                    <input type="text" id="nom" name="nom" class="form-control" placeholder="Ex: Diabète, Hypertension, Asthme..." required maxlength="100">
+                    <div class="form-hint">Nom médical de la pathologie</div>
+                </div>
+
+                <!-- Date de diagnostic -->
+                <div class="form-group">
+                    <label for="dateDiagnostic" class="form-label">Date de diagnostic</label>
+                    <input type="date" id="dateDiagnostic" name="dateDiagnostic" class="form-control">
+                    <div class="form-hint">Date à laquelle la pathologie a été diagnostiquée</div>
+                </div>
+
+                <!-- Type de pathologie -->
+                <div class="form-group">
+                    <label class="form-label">Type de pathologie</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="chronique" value="true">
+                            <span class="checkmark"></span>
+                            Pathologie chronique
+                        </label>
+                    </div>
+                    <div class="form-hint">Cochez si la pathologie est de nature chronique</div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="Ex: Description détaillée de la pathologie, historique..." maxlength="500"></textarea>
+                    <div class="form-hint">Description complète de la pathologie</div>
+                </div>
+
+                <!-- Symptômes -->
+                <div class="form-group">
+                    <label for="symptomes" class="form-label">Symptômes</label>
+                    <textarea id="symptomes" name="symptomes" class="form-control" rows="3" placeholder="Ex: Symptômes observés, fréquence, intensité..." maxlength="500"></textarea>
+                    <div class="form-hint">Symptômes associés à cette pathologie</div>
+                </div>
+
+                <!-- Traitement -->
+                <div class="form-group">
+                    <label for="traitement" class="form-label">Traitement</label>
+                    <textarea id="traitement" name="traitement" class="form-control" rows="3" placeholder="Ex: Médicaments, thérapie, suivi médical..." maxlength="500"></textarea>
+                    <div class="form-hint">Traitement prescrit ou recommandé</div>
+                </div>
+
+                <!-- Indications pour les pathologies chroniques -->
+                <div class="alert alert-info">
+                    <h4>📋 Informations sur les pathologies chroniques :</h4>
+                    <ul class="indications-list">
+                        <li><strong>Pathologie chronique :</strong> Maladie de longue durée qui évolue avec le temps</li>
+                        <li><strong>Exemples :</strong> Diabète, hypertension, arthrite, asthme persistant</li>
+                        <li><strong>Suivi :</strong> Nécessite un suivi médical régulier et continu</li>
+                        <li><strong>Traitement :</strong> Souvent basé sur la gestion des symptômes et la prévention des complications</li>
+                    </ul>
+                </div>
+
+                <!-- Actions du formulaire -->
+                <div class="form-actions">
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">Annuler</a>
+                    <button type="submit" class="btn btn-primary">➕ Ajouter la pathologie</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+    <script th:src="@{/js/infirmier/pathologie.js}"></script>
+</body>
+</html>

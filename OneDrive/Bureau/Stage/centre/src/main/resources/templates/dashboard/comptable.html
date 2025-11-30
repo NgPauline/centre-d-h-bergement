@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/comptable.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">💰 Tableau de bord - Comptable</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Comptable -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Tableau de bord financier</h2>
+                <div class="stats-grid comptable-stats">
+                    <div class="stat-card danger">
+                        <div class="stat-number" th:text="${stats.facturesEnRetard}">-</div>
+                        <div class="stat-label">Factures en retard</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${#numbers.formatDecimal(stats.totalImpayes, 0, 2)} + ' €'">- €</div>
+                        <div class="stat-label">Total impayés</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.facturesMois}">-</div>
+                        <div class="stat-label">Factures ce mois</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number" th:text="${#numbers.formatDecimal(stats.donsMois, 0, 2)} + ' €'">- €</div>
+                        <div class="stat-label">Dons ce mois</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Gestion financière</h3>
+                <div class="quick-actions">
+                    <a href="/comptable/factures/nouvelle" class="btn btn-primary">
+                        <i>🧾</i> Nouvelle facture
+                    </a>
+                    <a href="/comptable/factures/retard" class="btn btn-danger">
+                        <i>⚠️</i> Factures en retard
+                    </a>
+                    <a href="/comptable/dons" class="btn btn-success">
+                        <i>💰</i> Gérer les dons
+                    </a>
+                    <a href="/comptable/rapports" class="btn btn-warning">
+                        <i>📊</i> Rapports financiers
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alertes financières -->
+            <div class="financial-alerts">
+                <h3>🚨 Alertes financières</h3>
+                <div class="alert-list">
+                    <div th:if="${stats.facturesEnRetard > 0}" class="alert alert-danger">
+                        <strong th:text="${stats.facturesEnRetard}"></strong> facture(s) en retard
+                    </div>
+                    <div th:if="${stats.totalImpayes > 1000}" class="alert alert-warning">
+                        Impayés élevés: <strong th:text="${#numbers.formatDecimal(stats.totalImpayes, 0, 2)} + ' €'"></strong>
+                    </div>
+                    <div th:if="${stats.donsMois > 500}" class="alert alert-success">
+                        Dons importants ce mois: <strong th:text="${#numbers.formatDecimal(stats.donsMois, 0, 2)} + ' €'"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

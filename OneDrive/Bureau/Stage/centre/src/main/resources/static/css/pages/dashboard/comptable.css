@@ -1,0 +1,17 @@
+/* Dashboard Comptable spécifique */
+.comptable-stats .stat-card:first-child {
+    border-left-color: var(--accent-color);
+}
+
+.comptable-stats .stat-card:nth-child(2) {
+    border-left-color: var(--warning-color);
+}
+
+.comptable-stats .stat-card:nth-child(3) {
+    border-left-color: var(--primary-color);
+}
+
+.comptable-stats .stat-card:nth-child(4) {
+    border-left-color: var(--success-color);
+}
+

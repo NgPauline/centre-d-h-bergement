@@ -1,0 +1,479 @@
+/* Styles généraux pour les dossiers médicaux */
+.dossier-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #007bff;
+}
+
+.dossier-header h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.dossier-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.medical-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.info-item span {
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Styles pour les cartes médicales */
+.allergie-card, 
+.pathologie-card, 
+.prescription-card, 
+.consultation-card {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+}
+
+.allergie-header, 
+.pathologie-header, 
+.prescription-header, 
+.consultation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.allergie-header h5, 
+.pathologie-header h5, 
+.prescription-header h5, 
+.consultation-header h5 {
+    margin: 0;
+    flex: 1;
+    color: #333;
+}
+
+.allergie-details p, 
+.pathologie-details p,
+.prescription-details p, 
+.consultation-details p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.allergie-actions, 
+.pathologie-actions,
+.prescription-actions, 
+.consultation-actions {
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* Badges */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* États vides */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state-small {
+    text-align: center;
+    padding: 1rem;
+    color: #6c757d;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.text-content {
+    white-space: pre-line;
+    line-height: 1.6;
+}
+
+/* Cartes */
+.card {
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #6c757d;
+    border: 1px solid #6c757d;
+}
+
+.btn-outline:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Formulaires */
+.form-container { 
+    max-width: 800px; 
+    margin: 0 auto; 
+}
+
+.medical-form { 
+    background: white; 
+    padding: 2rem; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+}
+
+.form-group { 
+    margin-bottom: 1.5rem; 
+}
+
+.form-label { 
+    display: block; 
+    font-weight: 600; 
+    margin-bottom: 0.5rem; 
+    color: #333; 
+}
+
+.form-label:after { 
+    content: " *"; 
+    color: #dc3545; 
+}
+
+.form-label:not(:has(+ *[required])):after { 
+    content: ""; 
+}
+
+.form-control, 
+.form-select { 
+    width: 100%; 
+    padding: 0.75rem; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    font-size: 1rem; 
+    transition: border-color 0.2s; 
+}
+
+.form-control:focus, 
+.form-select:focus { 
+    outline: none; 
+    border-color: #007bff; 
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25); 
+}
+
+.form-hint { 
+    font-size: 0.875rem; 
+    color: #6c757d; 
+    margin-top: 0.25rem; 
+}
+
+.form-actions { 
+    display: flex; 
+    gap: 1rem; 
+    justify-content: flex-end; 
+    margin-top: 2rem; 
+    padding-top: 1.5rem; 
+    border-top: 1px solid #e9ecef; 
+}
+
+/* Checkbox */
+.checkbox-group { 
+    margin-top: 0.5rem; 
+}
+
+.checkbox-label { 
+    display: flex; 
+    align-items: center; 
+    cursor: pointer; 
+    font-weight: normal; 
+}
+
+.checkbox-label input[type="checkbox"] { 
+    display: none; 
+}
+
+.checkmark { 
+    width: 20px; 
+    height: 20px; 
+    border: 2px solid #ddd; 
+    border-radius: 4px; 
+    margin-right: 0.75rem; 
+    position: relative; 
+    transition: all 0.2s; 
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark { 
+    background: #007bff; 
+    border-color: #007bff; 
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark:after { 
+    content: "✓"; 
+    color: white; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    font-size: 14px; 
+    font-weight: bold; 
+}
+
+/* Alertes */
+.alert-info { 
+    background: #d1ecf1; 
+    border: 1px solid #bee5eb; 
+    border-radius: 6px; 
+    padding: 1.5rem; 
+    margin: 2rem 0; 
+}
+
+.alert-info h4 { 
+    margin: 0 0 1rem 0; 
+    color: #0c5460; 
+}
+
+.indications-list { 
+    margin: 0; 
+    padding-left: 1.5rem; 
+}
+
+.indications-list li { 
+    margin-bottom: 0.5rem; 
+    color: #0c5460; 
+}
+
+/* Recherche et filtres */
+.search-card {
+    margin-bottom: 1.5rem;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-btn {
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.filter-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Sections de formulaire */
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .medical-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .allergie-header, 
+    .pathologie-header,
+    .prescription-header, 
+    .consultation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .medical-form { 
+        padding: 1rem; 
+    }
+    
+    .form-actions { 
+        flex-direction: column; 
+    }
+    
+    .btn { 
+        justify-content: center; 
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .search-input, 
+    .search-btn {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}

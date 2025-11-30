@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title th:text="${personnel.id != null} ? 'Modifier Personnel' : 'Nouveau Personnel'">Formulaire Personnel</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" th:text="${personnel.id != null} ? 'Modifier le Personnel' : 'Nouveau Personnel'"></h1>
+            <a th:href="@{/personnel/liste}" class="btn btn-outline">
+                <i>←</i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="${personnel.id != null} ? @{/personnel/{id}/modifier(id=${personnel.id})} : @{/personnel/nouveau}" 
+                      method="post" th:object="${personnel}">
+                    
+                    <!-- Informations personnelles -->
+                    <div class="form-section">
+                        <h3>👤 Informations Personnelles</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom *</label>
+                                <input type="text" id="nom" th:field="*{nom}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom">Prénom *</label>
+                                <input type="text" id="prenom" th:field="*{prenom}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dateNaissance">Date de naissance</label>
+                                <input type="date" id="dateNaissance" th:field="*{dateNaissance}">
+                            </div>
+                            <div class="form-group">
+                                <label for="numeroNational">Numéro national</label>
+                                <input type="text" id="numeroNational" th:field="*{numeroNational}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coordonnées -->
+                    <div class="form-section">
+                        <h3>📞 Coordonnées</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telephone">Téléphone</label>
+                                <input type="tel" id="telephone" th:field="*{telephone}">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" th:field="*{email}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations professionnelles -->
+                    <div class="form-section">
+                        <h3>💼 Informations Professionnelles</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="matricule">Matricule *</label>
+                                <input type="text" id="matricule" th:field="*{matricule}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dateEmbauche">Date d'embauche *</label>
+                                <input type="date" id="dateEmbauche" th:field="*{dateEmbauche}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="poste">Poste *</label>
+                                <select id="poste" th:field="*{poste}" required>
+                                    <option value="">Sélectionnez un poste</option>
+                                    <option th:each="poste : ${postes}" 
+                                            th:value="${poste}" 
+                                            th:text="${poste}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="typeContrat">Type de contrat</label>
+                                <select id="typeContrat" th:field="*{typeContrat}">
+                                    <option value="">Sélectionnez un type</option>
+                                    <option th:each="contrat : ${typesContrat}" 
+                                            th:value="${contrat}" 
+                                            th:text="${contrat}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="salaire">Salaire (€)</label>
+                                <input type="number" id="salaire" th:field="*{salaire}" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adresse -->
+                    <div class="form-section">
+                        <h3>🏠 Adresse</h3>
+                        <div th:object="${personnel.adresse}">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="adresse.rue">Rue</label>
+                                    <input type="text" id="adresse.rue" th:field="*{rue}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="adresse.numero">Numéro</label>
+                                    <input type="text" id="adresse.numero" th:field="*{numero}">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="adresse.codePostal">Code postal</label>
+                                    <input type="text" id="adresse.codePostal" th:field="*{codePostal}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="adresse.ville">Ville</label>
+                                    <input type="text" id="adresse.ville" th:field="*{ville}">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="adresse.pays">Pays</label>
+                                    <input type="text" id="adresse.pays" th:field="*{pays}" value="France">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/personnel/liste}" class="btn btn-outline">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i th:text="${personnel.id != null} ? '💾' : '➕'"></i>
+                            <span th:text="${personnel.id != null} ? 'Modifier' : 'Créer le membre'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

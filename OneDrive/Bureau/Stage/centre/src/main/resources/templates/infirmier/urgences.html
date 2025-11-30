@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Appels d'Urgence - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Appels d'Urgence</h1>
+            <button class="btn btn-danger" onclick="openCreateModal()">
+                <i>🚨</i> Nouvel Appel d'Urgence
+            </button>
+        </div>
+
+        <!-- Alertes en temps réel -->
+        <div id="urgentAlerts" class="urgent-alerts-container">
+            <!-- Alertes critiques -->
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card danger" onclick="filterByStatus('non-clotures')">
+                <div class="stat-number" id="openCount">0</div>
+                <div class="stat-label">Non clôturés</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByStatus('famille-non-notifiee')">
+                <div class="stat-number" id="notNotifiedCount">0</div>
+                <div class="stat-label">Famille non notifiée</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Total aujourd'hui</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Type d'urgence:</label>
+                <select id="typeFilter" onchange="loadAppelsUrgence()">
+                    <option value="">Tous les types</option>
+                    <option value="MEDICAL">Médical</option>
+                    <option value="CHUTE">Chute</option>
+                    <option value="COMPORTEMENTAL">Comportemental</option>
+                    <option value="MATERIEL">Matériel</option>
+                    <option value="AUTRE">Autre</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadAppelsUrgence()">
+                    <option value="all">Tous</option>
+                    <option value="non-clotures">Non clôturés</option>
+                    <option value="famille-non-notifiee">Famille non notifiée</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Liste des appels -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Appels d'Urgence</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="refreshAppels()">
+                        <i>🔄</i> Actualiser
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="appelsList" class="appels-container">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Nouvel Appel -->
+    <div id="urgenceModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Nouvel Appel d'Urgence</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="urgenceForm" onsubmit="submitUrgence(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="residentId">Résident *</label>
+                            <select id="residentId" required>
+                                <option value="">Sélectionnez un résident</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Type d'urgence *</label>
+                            <select id="type" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="MEDICAL">Urgence médicale</option>
+                                <option value="CHUTE">Chute</option>
+                                <option value="COMPORTEMENTAL">Problème comportemental</option>
+                                <option value="MATERIEL">Problème matériel</option>
+                                <option value="AUTRE">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description de l'urgence *</label>
+                        <textarea id="description" rows="3" required placeholder="Décrivez la situation..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mesuresPrises">Mesures prises immédiatement</label>
+                        <textarea id="mesuresPrises" rows="2" placeholder="Premiers soins, interventions..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Créer l'appel d'urgence</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Actions Urgence -->
+    <div id="actionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Actions sur l'Appel</h3>
+                <span class="close" onclick="closeActionsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="urgence-info">
+                    <h4 id="urgenceResident"></h4>
+                    <p><strong>Type:</strong> <span id="urgenceType"></span></p>
+                    <p><strong>Date:</strong> <span id="urgenceDate"></span></p>
+                    <p id="urgenceDescription"></p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-danger" onclick="openAmbulanceModal()">
+                        <i>🚑</i> Appeler Ambulance
+                    </button>
+                    <button class="btn btn-warning" onclick="openNotifyModal()">
+                        <i>📞</i> Notifier la Famille
+                    </button>
+                    <button class="btn btn-success" onclick="openCloseModal()">
+                        <i>✅</i> Clôturer l'Appel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ambulance -->
+    <div id="ambulanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Appeler une Ambulance</h3>
+                <span class="close" onclick="closeAmbulanceModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="callAmbulance(event)">
+                    <div class="form-group">
+                        <label for="ambulanceNumber">Numéro d'ambulance *</label>
+                        <input type="text" id="ambulanceNumber" value="112" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination</label>
+                        <input type="text" id="destination" placeholder="Hôpital, clinique...">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeAmbulanceModal()">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Appeler l'ambulance</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

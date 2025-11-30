@@ -1,0 +1,35 @@
+/* Administration utilisateurs */
+.activity-logs {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-icon {
+    font-size: var(--font-size-lg);
+}
+
+.log-content {
+    flex: 1;
+}
+
+.log-message {
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.log-meta {
+    font-size: var(--font-size-xs);
+    color: #666;
+}

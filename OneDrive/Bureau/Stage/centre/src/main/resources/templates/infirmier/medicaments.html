@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Liste des Médicaments</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">💊 Gestion des Médicaments</h1>
+            <a th:href="@{/infirmier/medicaments/nouveau}" class="btn btn-primary">
+                ➕ Nouveau Médicament
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Barre de recherche -->
+        <div class="card search-card">
+            <div class="card-body">
+                <form th:action="@{/infirmier/medicaments/recherche}" method="get" class="search-form">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input type="text" 
+                                   name="keyword" 
+                                   class="search-input" 
+                                   placeholder="Rechercher un médicament..." 
+                                   th:value="${keyword}">
+                            <button type="submit" class="btn btn-primary search-btn">
+                                🔍 Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Médicaments enregistrés</h3>
+                <div class="header-actions">
+                    <span class="badge" th:text="${medicaments != null ? #lists.size(medicaments) : 0} + ' médicament(s)'"></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Principe actif</th>
+                                <th>Forme</th>
+                                <th>Dosage</th>
+                                <th>Laboratoire</th>
+                                <th>Code ATC</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${medicaments != null}" th:each="medicament : ${medicaments}">
+                                <td th:text="${medicament.nom}"></td>
+                                <td th:text="${medicament.principeActif} ?: '-'"></td>
+                                <td>
+                                    <span class="badge" th:text="${medicament.forme}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${medicament.dosage != null}" 
+                                          th:text="${medicament.dosage} + (${medicament.unite} ?: '')">
+                                    </span>
+                                    <span th:if="${medicament.dosage == null}" class="text-muted">-</span>
+                                </td>
+                                <td th:text="${medicament.laboratoire} ?: '-'"></td>
+                                <td th:text="${medicament.codeATC} ?: '-'"></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- CORRECTION : Route pour les détails -->
+                                        <a th:href="@{/infirmier/medicaments/details/{id}(id=${medicament.id})}" 
+                                           class="btn btn-sm btn-outline" title="Voir détails">
+                                            👁️
+                                        </a>
+                                        <!-- CORRECTION : Route pour la modification -->
+                                        <a th:href="@{/infirmier/medicaments/modifier/{id}(id=${medicament.id})}" 
+                                           class="btn btn-sm btn-primary" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <!-- CORRECTION : Route pour la suppression -->
+                                        <form th:action="@{/infirmier/medicaments/supprimer/{id}(id=${medicament.id})}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce médicament ?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr th:if="${medicaments == null}">
+                                <td colspan="7" class="text-center text-muted">
+                                    ❌ Erreur de chargement des médicaments
+                                </td>
+                            </tr>
+                            
+                            <tr th:if="${medicaments != null and #lists.isEmpty(medicaments)}">
+                                <td colspan="7" class="text-center text-muted">
+                                    <div th:if="${keyword != null}">
+                                        🔍 Aucun médicament trouvé pour votre recherche
+                                    </div>
+                                    <div th:if="${keyword == null}">
+                                        💊 Aucun médicament enregistré
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

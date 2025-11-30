@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Mon Profil - Centre Médical</title>
+    <link rel="stylesheet" th:href="@{/css/auth/profil.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Mon Profil</h1>
+        </div>
+
+        <div class="row">
+            <!-- Informations du profil -->
+            <div class="col-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Informations Personnelles</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-header">
+                            <div class="avatar-large">
+                                <span th:text="${#authentication.principal.username.substring(0,1).toUpperCase()}">U</span>
+                            </div>
+                            <div class="profile-info">
+                                <h2 th:text="${#authentication.principal.username}">Utilisateur</h2>
+                                <p class="role" th:text="${utilisateur.role}">Rôle</p>
+                                <p class="email" th:text="${utilisateur.email}">email@exemple.com</p>
+                            </div>
+                        </div>
+
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <div class="stat-number" th:text="${stats.nombreConnexions}">0</div>
+                                <div class="stat-label">Connexions</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number" th:text="${stats.depuis}">0j</div>
+                                <div class="stat-label">Jours</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number" th:text="${stats.derniereConnexion ? #dates.format(utilisateur.derniereConnexion, 'dd/MM') : 'N/A'}">N/A</div>
+                                <div class="stat-label">Dernière</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations du personnel associé -->
+                <div th:if="${utilisateur.personnel}" class="card">
+                    <div class="card-header">
+                        <h3>Informations Professionnelles</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Nom complet</label>
+                                <span th:text="${utilisateur.personnel.nomComplet}"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Poste</label>
+                                <span th:text="${utilisateur.personnel.poste}"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email</label>
+                                <span th:text="${utilisateur.personnel.email}"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Téléphone</label>
+                                <span th:text="${utilisateur.personnel.telephone}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modifier le mot de passe -->
+            <div class="col-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Modifier le Mot de Passe</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/profil/changer-mot-de-passe}" method="post" id="changePasswordForm">
+                            <div class="form-group">
+                                <label class="form-label">Mot de passe actuel</label>
+                                <input type="password" name="currentPassword" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nouveau mot de passe</label>
+                                <input type="password" name="newPassword" class="form-control" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                                <input type="password" name="confirmPassword" class="form-control" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Préférences -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Préférences</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="preferences">
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="notificationsEmail" checked>
+                                    <label class="form-check-label" for="notificationsEmail">Notifications par email</label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="notificationsSMS">
+                                    <label class="form-check-label" for="notificationsSMS">Notifications par SMS</label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <label class="form-label">Langue</label>
+                                <select class="form-control">
+                                    <option>Français</option>
+                                    <option>English</option>
+                                </select>
+                            </div>
+                            <div class="preference-item">
+                                <label class="form-label">Fuseau horaire</label>
+                                <select class="form-control">
+                                    <option>Europe/Paris</option>
+                                    <option>UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/auth.js}"></script>
+</body>
+</html>

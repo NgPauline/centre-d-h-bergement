@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/educateur.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🎯 Tableau de bord - Éducateur</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Éducateur -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Tableau de bord activités</h2>
+                <div class="stats-grid educateur-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.activitesAujourdhui}">-</div>
+                        <div class="stat-label">Activités aujourd'hui</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number" th:text="${stats.activitesSemaine}">-</div>
+                        <div class="stat-label">Activités cette semaine</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${stats.totalParticipants}">-</div>
+                        <div class="stat-label">Participants aujourd'hui</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number" th:text="${stats.programmesEnCours}">-</div>
+                        <div class="stat-label">Programmes en cours</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Gestion des activités</h3>
+                <div class="quick-actions">
+                    <a href="/educateur/activites/nouvelle" class="btn btn-primary">
+                        <i>🎯</i> Nouvelle activité
+                    </a>
+                    <a href="/educateur/activites" class="btn btn-success">
+                        <i>📅</i> Planning activités
+                    </a>
+                    <a href="/educateur/programmes" class="btn btn-warning">
+                        <i>📋</i> Programmes personnalisés
+                    </a>
+                    <a href="/educateur/evaluations" class="btn btn-info">
+                        <i>📝</i> Évaluations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Activités du jour -->
+            <div class="today-activities">
+                <h3>📅 Activités du jour</h3>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <span class="activity-time">09:00</span>
+                        <span class="activity-name">Atelier peinture</span>
+                        <span class="activity-participants">8 participants</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-time">14:00</span>
+                        <span class="activity-name">Sortie au parc</span>
+                        <span class="activity-participants">6 participants</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-time">16:00</span>
+                        <span class="activity-name">Jeux de mémoire</span>
+                        <span class="activity-participants">10 participants</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

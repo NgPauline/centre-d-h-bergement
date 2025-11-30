@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title th:text="${pageTitle}">Dossier Médical</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" th:text="${pageTitle}">Dossier Médical</h1>
+            <div class="header-actions">
+                <a th:href="@{/infirmier/dossiers-medicaux}" class="btn btn-outline">
+                    ← Retour à la liste
+                </a>
+                <a th:if="${dossier != null}" 
+                   th:href="@{/infirmier/dossiers-medicaux/{id}/modifier(id=${dossier.id})}" 
+                   class="btn btn-primary">
+                    ✏️ Modifier
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div th:if="${dossier == null}">
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>Aucun dossier médical</h3>
+                <p>Ce résident n'a pas encore de dossier médical.</p>
+                <a th:href="@{/infirmier/dossiers-medicaux/creer/{id}(id=${resident.id})}" 
+                   class="btn btn-primary">
+                    📝 Créer le dossier médical
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${dossier != null}">
+            <!-- En-tête dossier -->
+            <div class="dossier-header">
+                <h3 th:text="${dossier.resident.nomComplet}">Nom du Résident</h3>
+                <div class="dossier-info">
+                    <span>Dernière mise à jour: 
+                        <span th:text="${#temporals.format(dossier.derniereMAJ, 'dd/MM/yyyy HH:mm')}"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Informations générales -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>📋 Informations Médicales Générales</h4>
+                </div>
+                <div class="card-body">
+                    <div class="medical-info-grid">
+                        <div class="info-item">
+                            <label>Groupe sanguin:</label>
+                            <span th:text="${dossier.groupeSanguin} ?: 'Non renseigné'">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Poids:</label>
+                            <span th:text="${dossier.poids} ?: 'Non renseigné'">-</span> kg
+                        </div>
+                        <div class="info-item">
+                            <label>Taille:</label>
+                            <span th:text="${dossier.taille} ?: 'Non renseigné'">-</span> cm
+                        </div>
+                        <div class="info-item">
+                            <label>IMC:</label>
+                            <span th:if="${dossier.IMC != null}" 
+                                  th:text="${#numbers.formatDecimal(dossier.IMC, 1, 2)}"></span>
+                            <span th:if="${dossier.IMC == null}">Non calculable</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antécédents -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>📖 Antécédents Médicaux</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-content" th:text="${dossier.antecedents} ?: 'Aucun antécédent renseigné'"></div>
+                </div>
+            </div>
+
+            <!-- Traitements en cours -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>💊 Traitements en Cours</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-content" th:text="${dossier.traitementsEnCours} ?: 'Aucun traitement en cours'"></div>
+                </div>
+            </div>
+
+            <!-- Allergies -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>⚠️ Allergies</h4>
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}/allergie/ajouter(id=${dossier.id})}" 
+                       class="btn btn-primary btn-sm">
+                        ➕ Ajouter une allergie
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${dossier.allergies.empty}" class="empty-state-small">
+                        <p>Aucune allergie enregistrée</p>
+                    </div>
+                    <div th:unless="${dossier.allergies.empty}" class="allergies-container">
+                        <div th:each="allergie : ${dossier.allergies}" class="allergie-card">
+                            <div class="allergie-header">
+                                <h5 th:text="${allergie.substance}">Substance</h5>
+                                <span class="badge" 
+                                      th:classappend="${allergie.gravite == 'CRITIQUE'} ? 'badge-danger' : 
+                                                     ${allergie.gravite == 'SEVERE'} ? 'badge-warning' : 'badge-info'"
+                                      th:text="${allergie.gravite}">
+                                    Gravité
+                                </span>
+                            </div>
+                            <div class="allergie-details">
+                                <p><strong>Type de réaction:</strong> <span th:text="${allergie.typeReaction}">-</span></p>
+                                <p th:if="${allergie.traitement}"><strong>Traitement:</strong> <span th:text="${allergie.traitement}">-</span></p>
+                                <p th:if="${allergie.symptomes}"><strong>Symptômes:</strong> <span th:text="${allergie.symptomes}">-</span></p>
+                            </div>
+                            <div class="allergie-actions">
+                                <form th:action="@{/infirmier/allergies/{id}/supprimer(id=${allergie.id})}" 
+                                      method="post" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette allergie ?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pathologies -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>🏥 Pathologies</h4>
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}/pathologie/ajouter(id=${dossier.id})}" 
+                       class="btn btn-primary btn-sm">
+                        ➕ Ajouter une pathologie
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${dossier.pathologies.empty}" class="empty-state-small">
+                        <p>Aucune pathologie enregistrée</p>
+                    </div>
+                    <div th:unless="${dossier.pathologies.empty}" class="pathologies-container">
+                        <div th:each="pathologie : ${dossier.pathologies}" class="pathologie-card">
+                            <div class="pathologie-header">
+                                <h5 th:text="${pathologie.nom}">Nom pathologie</h5>
+                                <span th:if="${pathologie.chronique}" class="badge badge-warning">Chronique</span>
+                                <span th:if="${pathologie.aigue}" class="badge badge-danger">Aiguë</span>
+                            </div>
+                            <div class="pathologie-details">
+                                <p th:if="${pathologie.description}"><strong>Description:</strong> <span th:text="${pathologie.description}">-</span></p>
+                                <p th:if="${pathologie.traitement}"><strong>Traitement:</strong> <span th:text="${pathologie.traitement}">-</span></p>
+                                <p th:if="${pathologie.dateDiagnostic}"><strong>Date diagnostic:</strong> 
+                                    <span th:text="${#temporals.format(pathologie.dateDiagnostic, 'dd/MM/yyyy')}">-</span>
+                                </p>
+                            </div>
+                            <div class="pathologie-actions">
+                                <form th:action="@{/infirmier/pathologies/{id}/supprimer(id=${pathologie.id})}" 
+                                      method="post" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pathologie ?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescriptions actives -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>📝 Prescriptions Actives</h4>
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}/prescription/ajouter(id=${dossier.id})}" 
+                       class="btn btn-primary btn-sm">
+                        ➕ Ajouter une prescription
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${dossier.prescriptionsActives.empty}" class="empty-state-small">
+                        <p>Aucune prescription active</p>
+                    </div>
+                    <div th:unless="${dossier.prescriptionsActives.empty}" class="prescriptions-container">
+                        <div th:each="prescription : ${dossier.prescriptionsActives}" class="prescription-card">
+                            <div class="prescription-header">
+                                <h5 th:text="${prescription.medicament}">Médicament</h5>
+                                <span class="badge" 
+                                      th:classappend="${prescription.urgence} ? 'badge-danger' : 'badge-success'"
+                                      th:text="${prescription.urgence} ? 'URGENT' : 'Normal'">
+                                </span>
+                            </div>
+                            <div class="prescription-details">
+                                <p><strong>Posologie:</strong> <span th:text="${prescription.posologie}">-</span></p>
+                                <p><strong>Fréquence:</strong> <span th:text="${prescription.frequence}">-</span></p>
+                                <p th:if="${prescription.dateDebut}"><strong>Début:</strong> 
+                                    <span th:text="${#temporals.format(prescription.dateDebut, 'dd/MM/yyyy')}">-</span>
+                                </p>
+                                <p th:if="${prescription.dateFin}"><strong>Fin:</strong> 
+                                    <span th:text="${#temporals.format(prescription.dateFin, 'dd/MM/yyyy')}">-</span>
+                                </p>
+                                <p th:if="${prescription.instructions}"><strong>Instructions:</strong> 
+                                    <span th:text="${prescription.instructions}">-</span>
+                                </p>
+                            </div>
+                            <div class="prescription-actions">
+                                <form th:action="@{/infirmier/prescriptions/{id}/supprimer(id=${prescription.id})}" 
+                                      method="post" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette prescription ?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultations récentes -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>🩺 Consultations Médicales</h4>
+                    <a th:href="@{/infirmier/dossiers-medicaux/{id}/consultation/ajouter(id=${dossier.id})}" 
+                       class="btn btn-primary btn-sm">
+                        ➕ Ajouter une consultation
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${dossier.consultations.empty}" class="empty-state-small">
+                        <p>Aucune consultation enregistrée</p>
+                    </div>
+                    <div th:unless="${dossier.consultations.empty}" class="consultations-container">
+                        <div th:each="consultation : ${dossier.consultations}" class="consultation-card">
+                            <div class="consultation-header">
+                                <h5 th:text="${consultation.typeConsultation}">Type consultation</h5>
+                                <span class="badge" 
+                                      th:classappend="${consultation.urgence} ? 'badge-danger' : 'badge-info'"
+                                      th:text="${consultation.urgence} ? 'URGENT' : 'Planifiée'">
+                                </span>
+                            </div>
+                            <div class="consultation-details">
+                                <p th:if="${consultation.dateConsultation}"><strong>Date:</strong> 
+                                    <span th:text="${#temporals.format(consultation.dateConsultation, 'dd/MM/yyyy HH:mm')}">-</span>
+                                </p>
+                                <p th:if="${consultation.medecin}"><strong>Médecin:</strong> 
+                                    <span th:text="${consultation.medecin}">-</span>
+                                </p>
+                                <p th:if="${consultation.motif}"><strong>Motif:</strong> 
+                                    <span th:text="${consultation.motif}">-</span>
+                                </p>
+                                <p th:if="${consultation.diagnostic}"><strong>Diagnostic:</strong> 
+                                    <span th:text="${consultation.diagnostic}">-</span>
+                                </p>
+                                <p th:if="${consultation.recommandations}"><strong>Recommandations:</strong> 
+                                    <span th:text="${consultation.recommandations}">-</span>
+                                </p>
+                            </div>
+                            <div class="consultation-actions">
+                                <form th:action="@{/infirmier/consultations/{id}/supprimer(id=${consultation.id})}" 
+                                      method="post" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette consultation ?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+     <script th:src="@{/js/app.js}"></script>
+    <style>
+    </style>
+</body>
+</html>

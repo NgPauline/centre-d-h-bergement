@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Formulaire Allergie</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">
+            <span th:if="${allergie != null}">Modifier l'allergie</span>
+            <span th:unless="${allergie != null}">Ajouter une allergie</span>
+        </h1>
+        <div class="header-actions">
+            <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">
+                ← Retour au dossier médical
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages flash -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="form-container">
+
+        <!-- Formulaire pour modification -->
+        <form th:if="${allergie != null}" th:action="@{/infirmier/allergies/{id}/modifier(id=${allergie.id})}" method="post" class="medical-form">
+            <input type="hidden" name="dossierMedicalId" th:value="${dossierId}">
+
+            <!-- Substance -->
+            <div class="form-group">
+                <label for="substance" class="form-label">Substance allergène *</label>
+                <input type="text" id="substance" name="substance" th:value="${allergie.substance}"
+                       class="form-control" placeholder="Ex: Penicilline, Arachides, Pollen..." required maxlength="100">
+                <div class="form-hint">Nom de la substance qui provoque l'allergie</div>
+            </div>
+
+            <!-- Type de réaction -->
+            <div class="form-group">
+                <label for="typeReaction" class="form-label">Type de réaction</label>
+                <input type="text" id="typeReaction" name="typeReaction" th:value="${allergie.typeReaction}"
+                       class="form-control" placeholder="Ex: Urticaire, Œdème, Difficultés respiratoires..." maxlength="100">
+                <div class="form-hint">Description des symptômes ou type de réaction</div>
+            </div>
+
+            <!-- Niveau de gravité -->
+            <div class="form-group">
+                <label for="gravite" class="form-label">Niveau de gravité *</label>
+                <select id="gravite" name="gravite" class="form-select" required>
+                    <option value="">Sélectionnez la gravité</option>
+                    <option value="LEGERE" th:selected="${allergie.gravite != null and allergie.gravite.name() == 'LEGERE'}">
+                        Légère - Symptômes mineurs
+                    </option>
+                    <option value="MODEREE" th:selected="${allergie.gravite != null and allergie.gravite.name() == 'MODEREE'}">
+                        Modérée - Symptômes gênants
+                    </option>
+                    <option value="SEVERE" th:selected="${allergie.gravite != null and allergie.gravite.name() == 'SEVERE'}">
+                        Sévère - Nécessite une intervention médicale
+                    </option>
+                    <option value="CRITIQUE" th:selected="${allergie.gravite != null and allergie.gravite.name() == 'CRITIQUE'}">
+                        Critique - Risque de choc anaphylactique
+                    </option>
+                </select>
+                <div class="form-hint">Évaluez la sévérité de la réaction allergique</div>
+            </div>
+
+            <!-- Traitement -->
+            <div class="form-group">
+                <label for="traitement" class="form-label">Traitement recommandé</label>
+                <textarea id="traitement" name="traitement" class="form-control" rows="3"
+                          placeholder="Ex: Antihistaminiques, Corticoïdes, Adrénaline auto-injectable..." maxlength="500"
+                          th:text="${allergie.traitement}"></textarea>
+                <div class="form-hint">Traitement à administrer en cas de réaction</div>
+            </div>
+
+            <!-- Observations -->
+            <div class="form-group">
+                <label for="observations" class="form-label">Observations supplémentaires</label>
+                <textarea id="observations" name="observations" class="form-control" rows="4"
+                          placeholder="Ex: Date de première apparition, circonstances, facteurs aggravants..."
+                          maxlength="1000" th:text="${allergie.observations}"></textarea>
+                <div class="form-hint">Toute information complémentaire utile</div>
+            </div>
+
+            <!-- Indications -->
+            <div class="alert alert-info">
+                <h4>📋 Indications selon le niveau de gravité :</h4>
+                <ul class="indications-list">
+                    <li><strong>Légère :</strong> Symptômes locaux sans impact sur l'état général</li>
+                    <li><strong>Modérée :</strong> Symptômes étendus avec inconfort notable</li>
+                    <li><strong>Sévère :</strong> Symptômes systémiques nécessitant une consultation médicale</li>
+                    <li><strong>Critique :</strong> Urgence vitale (choc anaphylactique) nécessitant une intervention immédiate</li>
+                </ul>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">Annuler</a>
+                <button type="submit" class="btn btn-primary">💾 Modifier l'allergie</button>
+            </div>
+        </form>
+
+        <!-- Formulaire pour ajout -->
+        <form th:unless="${allergie != null}" th:action="@{/infirmier/allergies/ajouter}" method="post" class="medical-form">
+            <input type="hidden" name="dossierMedicalId" th:value="${dossierId}">
+
+            <div class="form-group">
+                <label for="substance" class="form-label">Substance allergène *</label>
+                <input type="text" id="substance" name="substance" class="form-control"
+                       placeholder="Ex: Penicilline, Arachides, Pollen..." required maxlength="100">
+                <div class="form-hint">Nom de la substance qui provoque l'allergie</div>
+            </div>
+
+            <div class="form-group">
+                <label for="typeReaction" class="form-label">Type de réaction</label>
+                <input type="text" id="typeReaction" name="typeReaction" class="form-control"
+                       placeholder="Ex: Urticaire, Œdème, Difficultés respiratoires..." maxlength="100">
+                <div class="form-hint">Description des symptômes ou type de réaction</div>
+            </div>
+
+            <div class="form-group">
+                <label for="gravite" class="form-label">Niveau de gravité *</label>
+                <select id="gravite" name="gravite" class="form-select" required>
+                    <option value="">Sélectionnez la gravité</option>
+                    <option value="LEGERE">Légère - Symptômes mineurs</option>
+                    <option value="MODEREE">Modérée - Symptômes gênants</option>
+                    <option value="SEVERE">Sévère - Nécessite une intervention médicale</option>
+                    <option value="CRITIQUE">Critique - Risque de choc anaphylactique</option>
+                </select>
+                <div class="form-hint">Évaluez la sévérité de la réaction allergique</div>
+            </div>
+
+            <div class="form-group">
+                <label for="traitement" class="form-label">Traitement recommandé</label>
+                <textarea id="traitement" name="traitement" class="form-control" rows="3"
+                          placeholder="Ex: Antihistaminiques, Corticoïdes, Adrénaline auto-injectable..." maxlength="500"></textarea>
+                <div class="form-hint">Traitement à administrer en cas de réaction</div>
+            </div>
+
+            <div class="form-group">
+                <label for="observations" class="form-label">Observations supplémentaires</label>
+                <textarea id="observations" name="observations" class="form-control" rows="4"
+                          placeholder="Ex: Date de première apparition, circonstances, facteurs aggravants..." maxlength="1000"></textarea>
+                <div class="form-hint">Toute information complémentaire utile</div>
+            </div>
+
+            <div class="alert alert-info">
+                <h4>📋 Indications selon le niveau de gravité :</h4>
+                <ul class="indications-list">
+                    <li><strong>Légère :</strong> Symptômes locaux sans impact sur l'état général</li>
+                    <li><strong>Modérée :</strong> Symptômes étendus avec inconfort notable</li>
+                    <li><strong>Sévère :</strong> Symptômes systémiques nécessitant une consultation médicale</li>
+                    <li><strong>Critique :</strong> Urgence vitale nécessitant une intervention immédiate</li>
+                </ul>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/infirmier/dossiers-medicaux/{id}(id=${dossierId})}" class="btn btn-outline">Annuler</a>
+                <button type="submit" class="btn btn-primary">➕ Ajouter l'allergie</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/infirmier/allergie.js}"></script>
+</body>
+</html>

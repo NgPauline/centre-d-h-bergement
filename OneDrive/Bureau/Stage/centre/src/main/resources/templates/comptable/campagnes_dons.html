@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Campagnes de Dons - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Campagnes de Dons</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>💰</i> Nouvelle Campagne
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card success" onclick="filterByStatus('en-cours')">
+                <div class="stat-number" id="activeCount">0</div>
+                <div class="stat-label">En cours</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByStatus('a-venir')">
+                <div class="stat-number" id="upcomingCount">0</div>
+                <div class="stat-label">À venir</div>
+            </div>
+            <div class="stat-card info" onclick="filterByStatus('terminees')">
+                <div class="stat-number" id="completedCount">0</div>
+                <div class="stat-label">Terminées</div>
+            </div>
+            <div class="stat-card" onclick="filterByStatus('objectif-atteint')">
+                <div class="stat-number" id="goalReachedCount">0</div>
+                <div class="stat-label">Objectif atteint</div>
+            </div>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadCampagnes()">
+                    <option value="all">Toutes les campagnes</option>
+                    <option value="actives">Actives</option>
+                    <option value="en-cours">En cours</option>
+                    <option value="a-venir">À venir</option>
+                    <option value="terminees">Terminées</option>
+                    <option value="objectif-atteint">Objectif atteint</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Recherche:</label>
+                <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="searchCampagnes()">
+            </div>
+        </div>
+
+        <!-- Liste des campagnes -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Campagnes de Dons</h3>
+                <div class="header-actions">
+                    <span id="campaignCount" class="badge">0 campagnes</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="campagnesList" class="campagnes-container">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Création/Édition -->
+    <div id="campagneModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Campagne de Dons</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="campagneForm" onsubmit="submitCampagneForm(event)">
+                    <input type="hidden" id="campagneId">
+                    
+                    <div class="form-group">
+                        <label for="titre">Titre de la campagne *</label>
+                        <input type="text" id="titre" required placeholder="Ex: Campagne d'équipement médical">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" rows="3" required placeholder="Décrivez l'objectif de cette campagne..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="objectif">Objectif de la campagne</label>
+                            <textarea id="objectif" rows="2" placeholder="Objectifs spécifiques à atteindre..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="objectifMontant">Objectif financier (€) *</label>
+                            <input type="number" id="objectifMontant" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateDebut">Date de début *</label>
+                            <input type="date" id="dateDebut" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFin">Date de fin *</label>
+                            <input type="date" id="dateFin" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="couleurTheme">Couleur du thème</label>
+                            <input type="color" id="couleurTheme" value="#007bff">
+                        </div>
+                        <div class="form-group">
+                            <label for="imageUrl">URL de l'image</label>
+                            <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="messageRemerciement">Message de remerciement</label>
+                        <textarea id="messageRemerciement" rows="2" placeholder="Message à afficher aux donateurs..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer la campagne</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Statistiques -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Statistiques de la Campagne</h3>
+                <span class="close" onclick="closeStatsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="statsContent">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Planning du Personnel - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Planning du Personnel</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>📅</i> Nouveau Planning
+            </button>
+        </div>
+
+        <!-- Contrôles calendrier -->
+        <div class="calendar-controls">
+            <div class="control-group">
+                <button class="btn btn-outline" onclick="changeWeek(-1)">← Semaine précédente</button>
+                <h3 id="currentWeek"></h3>
+                <button class="btn btn-outline" onclick="changeWeek(1)">Semaine suivante →</button>
+            </div>
+            <div class="control-group">
+                <select id="personnelFilter" onchange="loadPlannings()">
+                    <option value="">Tout le personnel</option>
+                </select>
+                <button class="btn btn-outline" onclick="toggleView()">
+                    <i id="viewIcon">📋</i> <span id="viewText">Vue liste</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Vue calendrier -->
+        <div id="calendarView">
+            <div class="week-calendar">
+                <div class="week-header">
+                    <div class="time-column">Heure</div>
+                    <div class="day-column" th:each="day : ${daysOfWeek}">
+                        <div class="day-name" th:text="${day.name}"></div>
+                        <div class="day-date" th:text="${day.date}"></div>
+                    </div>
+                </div>
+                <div class="week-body">
+                    <div class="time-slots">
+                        <!-- Créneaux horaires -->
+                    </div>
+                    <div class="planning-slots">
+                        <!-- Plannings chargés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vue liste -->
+        <div id="listView" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Plannings de la semaine</h3>
+                    <div class="header-actions">
+                        <button class="btn btn-outline" onclick="validateAll()">
+                            <i>✅</i> Valider tous
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Personnel</th>
+                                <th>Date</th>
+                                <th>Créneau</th>
+                                <th>Activité</th>
+                                <th>Lieu</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planningsTableBody">
+                            <!-- Chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Planning -->
+    <div id="planningModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouveau Planning</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="planningForm" onsubmit="submitPlanningForm(event)">
+                    <input type="hidden" id="planningId">
+                    
+                    <div class="form-group">
+                        <label for="planningPersonnelId">Personnel *</label>
+                        <select id="planningPersonnelId" required>
+                            <option value="">Sélectionnez un membre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="shift">Shift *</label>
+                            <select id="shift" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="MATIN">Matin</option>
+                                <option value="APRES_MIDI">Après-midi</option>
+                                <option value="NUIT">Nuit</option>
+                                <option value="JOURNEE_COMPLETE">Journée complète</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="heureDebut">Heure de début</label>
+                            <input type="time" id="heureDebut">
+                        </div>
+                        <div class="form-group">
+                            <label for="heureFin">Heure de fin</label>
+                            <input type="time" id="heureFin">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activite">Activité</label>
+                        <input type="text" id="activite" placeholder="Description de l'activité...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lieu">Lieu</label>
+                        <input type="text" id="lieu" placeholder="Lieu de travail...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="2" placeholder="Notes supplémentaires..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

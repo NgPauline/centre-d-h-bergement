@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion des Contrats - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Contrats</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>📝</i> Nouveau Contrat
+            </button>
+        </div>
+
+        <!-- Alertes contrats -->
+        <div id="contractAlerts" class="alerts-container">
+            <!-- Alertes dynamiques -->
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card success" onclick="filterByStatus('actifs')">
+                <div class="stat-number" id="activeCount">0</div>
+                <div class="stat-label">Actifs</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByStatus('expirant-soon')">
+                <div class="stat-number" id="expiringCount">0</div>
+                <div class="stat-label">Expirent bientôt</div>
+            </div>
+            <div class="stat-card danger" onclick="filterByStatus('expires')">
+                <div class="stat-number" id="expiredCount">0</div>
+                <div class="stat-label">Expirés</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadContrats()">
+                    <option value="all">Tous les contrats</option>
+                    <option value="actifs">Actifs</option>
+                    <option value="expirant-soon">Expirent bientôt</option>
+                    <option value="expires">Expirés</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Type hébergement:</label>
+                <select id="typeFilter" onchange="loadContrats()">
+                    <option value="">Tous les types</option>
+                    <option value="PERMANENT">Permanent</option>
+                    <option value="TEMPORAIRE">Temporaire</option>
+                    <option value="JOURNEE">Journée</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Liste des contrats -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Contrats d'Hébergement</h3>
+                <div class="header-actions">
+                    <span id="contractCount" class="badge">0 contrats</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Résident</th>
+                            <th>Type</th>
+                            <th>Date début</th>
+                            <th>Date fin</th>
+                            <th>Tarif mensuel</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contratsTableBody">
+                        <!-- Chargé dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Contrat -->
+    <div id="contratModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouveau Contrat</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="contratForm" onsubmit="submitContratForm(event)">
+                    <input type="hidden" id="contratId">
+                    
+                    <div class="form-group">
+                        <label for="residentId">Résident *</label>
+                        <select id="residentId" required>
+                            <option value="">Sélectionnez un résident</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateDebut">Date de début *</label>
+                            <input type="date" id="dateDebut" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFin">Date de fin *</label>
+                            <input type="date" id="dateFin" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typeHebergement">Type d'hébergement *</label>
+                            <select id="typeHebergement" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="PERMANENT">Hébergement permanent</option>
+                                <option value="TEMPORAIRE">Hébergement temporaire</option>
+                                <option value="JOURNEE">Accueil de jour</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dureeContrat">Durée du contrat</label>
+                            <input type="text" id="dureeContrat" placeholder="Ex: 1 an">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tarifMensuel">Tarif mensuel (€) *</label>
+                        <input type="number" id="tarifMensuel" min="0" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="conditions">Conditions générales</label>
+                        <textarea id="conditions" rows="3" placeholder="Conditions spécifiques du contrat..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="conditionsParticulieres">Conditions particulières</label>
+                        <textarea id="conditionsParticulieres" rows="2" placeholder="Conditions spécifiques au résident..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer le contrat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Renouvellement -->
+    <div id="renewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Renouveler le Contrat</h3>
+                <span class="close" onclick="closeRenewModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="contract-info">
+                    <h4 id="renewResident"></h4>
+                    <p><strong>Contrat actuel jusqu'au:</strong> <span id="currentEndDate"></span></p>
+                    <p><strong>Tarif actuel:</strong> <span id="currentTarif"></span> €/mois</p>
+                </div>
+
+                <form onsubmit="renewContract(event)">
+                    <input type="hidden" id="renewContractId">
+                    
+                    <div class="form-group">
+                        <label for="nouvelleDateFin">Nouvelle date de fin *</label>
+                        <input type="date" id="nouvelleDateFin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nouveauTarif">Nouveau tarif mensuel (€)</label>
+                        <input type="number" id="nouveauTarif" min="0" step="0.01" placeholder="Laissez vide pour garder le même">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeRenewModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Renouveler le contrat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Résiliation -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Résilier le Contrat</h3>
+                <span class="close" onclick="closeCancelModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Attention:</strong> Cette action est irréversible. Le contrat sera marqué comme résilié.
+                </div>
+
+                <form onsubmit="cancelContract(event)">
+                    <input type="hidden" id="cancelContractId">
+                    
+                    <div class="form-group">
+                        <label for="motifResiliation">Motif de résiliation *</label>
+                        <textarea id="motifResiliation" rows="3" required placeholder="Raison de la résiliation..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Confirmer la résiliation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

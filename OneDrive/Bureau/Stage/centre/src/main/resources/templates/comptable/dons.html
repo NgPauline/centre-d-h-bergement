@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion des Dons - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Dons</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>💰</i> Nouveau Don
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <div class="stat-number" id="totalDons">0 €</div>
+                <div class="stat-label">Total collecté</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByType('recus-en-attente')">
+                <div class="stat-number" id="pendingReceipts">0</div>
+                <div class="stat-label">Reçus en attente</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="totalDonors">0</div>
+                <div class="stat-label">Donateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgDonation">0 €</div>
+                <div class="stat-label">Don moyen</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Type donateur:</label>
+                <select id="donorTypeFilter" onchange="loadDons()">
+                    <option value="">Tous les types</option>
+                    <option value="PARTICULIER">Particulier</option>
+                    <option value="ENTREPRISE">Entreprise</option>
+                    <option value="ASSOCIATION">Association</option>
+                    <option value="FONDATION">Fondation</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Type don:</label>
+                <select id="donTypeFilter" onchange="loadDons()">
+                    <option value="">Tous les types</option>
+                    <option value="FINANCIER">Financier</option>
+                    <option value="MATERIEL">Matériel</option>
+                    <option value="SERVICE">Service</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Statut reçu:</label>
+                <select id="receiptFilter" onchange="loadDons()">
+                    <option value="all">Tous</option>
+                    <option value="pending">Reçus en attente</option>
+                    <option value="sent">Reçus envoyés</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchDonor" placeholder="Rechercher donateur..." onkeyup="searchDons()">
+            </div>
+        </div>
+
+        <!-- Liste des dons -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Dons Reçus</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="exportDons()">
+                        <i>📤</i> Exporter
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Donateur</th>
+                            <th>Type</th>
+                            <th>Montant</th>
+                            <th>Reçu fiscal</th>
+                            <th>Remerciement</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donsTableBody">
+                        <!-- Chargé dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Don -->
+    <div id="donModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouveau Don</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="donForm" onsubmit="submitDonForm(event)">
+                    <input type="hidden" id="donId">
+                    
+                    <div class="form-group">
+                        <label for="typeDonateur">Type de donateur *</label>
+                        <select id="typeDonateur" required onchange="toggleDonateurFields()">
+                            <option value="">Sélectionnez</option>
+                            <option value="PARTICULIER">Particulier</option>
+                            <option value="ENTREPRISE">Entreprise</option>
+                            <option value="ASSOCIATION">Association</option>
+                            <option value="FONDATION">Fondation</option>
+                        </select>
+                    </div>
+
+                    <!-- Champs pour particulier -->
+                    <div id="particulierFields" class="donateur-fields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nomDonateur">Nom *</label>
+                                <input type="text" id="nomDonateur">
+                            </div>
+                            <div class="form-group">
+                                <label for="prenomDonateur">Prénom *</label>
+                                <input type="text" id="prenomDonateur">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Champs pour organisation -->
+                    <div id="organisationFields" class="donateur-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="organisationDonateur">Nom de l'organisation *</label>
+                            <input type="text" id="organisationDonateur">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" id="telephone">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typeDon">Type de don *</label>
+                            <select id="typeDon" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="FINANCIER">Financier</option>
+                                <option value="MATERIEL">Matériel</option>
+                                <option value="SERVICE">Service</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="montant">Montant (€) *</label>
+                            <input type="number" id="montant" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message du donateur</label>
+                        <textarea id="message" rows="2" placeholder="Message accompagnant le don..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="recuFiscalDemande">
+                            <span class="checkmark"></span>
+                            Reçu fiscal demandé
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer le don</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Actions Don -->
+    <div id="actionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Actions sur le Don</h3>
+                <span class="close" onclick="closeActionsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="don-info">
+                    <h4 id="actionDonateur"></h4>
+                    <p><strong>Montant:</strong> <span id="actionMontant"></span> €</p>
+                    <p><strong>Date:</strong> <span id="actionDate"></span></p>
+                    <p id="actionMessage"></p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="generateReceipt()">
+                        <i>🧾</i> Générer Reçu Fiscal
+                    </button>
+                    <button class="btn btn-info" onclick="sendThankYou()">
+                        <i>✉️</i> Envoyer Remerciement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

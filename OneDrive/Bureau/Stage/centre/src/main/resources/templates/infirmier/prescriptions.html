@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion des Prescriptions - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Prescriptions</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>💊</i> Nouvelle Prescription
+            </button>
+        </div>
+
+        <!-- Alertes prescriptions -->
+        <div id="prescriptionAlerts" class="alerts-container">
+            <!-- Alertes dynamiques -->
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card success" onclick="filterByStatus('actives')">
+                <div class="stat-number" id="activeCount">0</div>
+                <div class="stat-label">Actives</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByStatus('expirees')">
+                <div class="stat-number" id="expiringCount">0</div>
+                <div class="stat-label">Expirent bientôt</div>
+            </div>
+            <div class="stat-card danger" onclick="filterByStatus('expirees')">
+                <div class="stat-number" id="expiredCount">0</div>
+                <div class="stat-label">Expirées</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="suspendedCount">0</div>
+                <div class="stat-label">Suspendues</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Résident:</label>
+                <select id="residentFilter" onchange="loadPrescriptions()">
+                    <option value="">Tous les résidents</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadPrescriptions()">
+                    <option value="all">Toutes</option>
+                    <option value="actives">Actives</option>
+                    <option value="expirees">Expirées</option>
+                    <option value="suspendues">Suspendues</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Médecin:</label>
+                <input type="text" id="medecinFilter" placeholder="Filtrer par médecin..." onkeyup="filterPrescriptions()">
+            </div>
+        </div>
+
+        <!-- Liste des prescriptions -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Prescriptions Médicales</h3>
+                <div class="header-actions">
+                    <span id="prescriptionCount" class="badge">0 prescriptions</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Résident</th>
+                            <th>Médicament</th>
+                            <th>Posologie</th>
+                            <th>Période</th>
+                            <th>Médecin</th>
+                            <th>Spécialité</th> <!-- AJOUT: Colonne spécialité -->
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prescriptionsTableBody">
+                        <!-- Chargé dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Prescription -->
+    <div id="prescriptionModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Prescription</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="prescriptionForm" onsubmit="submitPrescriptionForm(event)">
+                    <input type="hidden" id="prescriptionId">
+                    
+                    <div class="form-group">
+                        <label for="prescriptionResidentId">Résident *</label>
+                        <select id="prescriptionResidentId" required onchange="loadResidentDossier()">
+                            <option value="">Sélectionnez un résident</option>
+                        </select>
+                    </div>
+
+                    <!-- AJOUT: Champ caché pour dossier médical -->
+                    <input type="hidden" id="dossierMedicalId">
+
+                    <div class="form-group">
+                        <label for="medicamentId">Médicament *</label>
+                        <select id="medicamentId" required>
+                            <option value="">Sélectionnez un médicament</option>
+                        <!-- Chargé dynamiquement -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateDebut">Date de début *</label>
+                            <input type="date" id="dateDebut" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFin">Date de fin *</label>
+                            <input type="date" id="dateFin" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posologie">Posologie *</label>
+                        <textarea id="posologie" rows="2" required placeholder="Ex: 1 comprimé matin et soir"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="medecinExterne">Médecin prescripteur *</label> <!-- AJOUT: requis -->
+                            <input type="text" id="medecinExterne" placeholder="Nom du médecin" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="numeroInami">Numéro INAMI</label>
+                            <input type="text" id="numeroInami" placeholder="Numéro INAMI">
+                        </div>
+                    </div>
+
+                    <!-- AJOUT: Champ spécialité -->
+                    <div class="form-group">
+                        <label for="specialite">Spécialité du médecin</label>
+                        <input type="text" id="specialite" placeholder="Ex: Cardiologie, Généraliste...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instructions">Instructions spéciales</label>
+                        <textarea id="instructions" rows="2" placeholder="Instructions particulières..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motif">Motif de la prescription *</label> <!-- AJOUT: requis -->
+                        <textarea id="motif" rows="2" placeholder="Raison médicale..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="active" checked>
+                            <span class="checkmark"></span>
+                            Prescription active
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer la prescription</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Renouvellement -->
+    <div id="renewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Renouveler la Prescription</h3>
+                <span class="close" onclick="closeRenewModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="prescription-info">
+                    <h4 id="renewMedicament"></h4>
+                    <p><strong>Résident:</strong> <span id="renewResident"></span></p>
+                    <p><strong>Fin actuelle:</strong> <span id="renewCurrentEnd"></span></p>
+                </div>
+
+                <form onsubmit="renewPrescription(event)">
+                    <input type="hidden" id="renewPrescriptionId">
+                    
+                    <div class="form-group">
+                        <label for="nouvelleDateFin">Nouvelle date de fin *</label>
+                        <input type="date" id="nouvelleDateFin" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeRenewModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Renouveler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+    <script th:src="@{/js/prescription.js}"></script>
+</body>
+</html>

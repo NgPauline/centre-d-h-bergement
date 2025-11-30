@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title th:text="${medicament?.id != null} ? 'Modifier Médicament' : 'Nouveau Médicament'">
+        Formulaire Médicament
+    </title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" th:text="${medicament?.id != null} ? 'Modifier le Médicament' : 'Nouveau Médicament'">
+                Nouveau Médicament
+            </h1>
+            <a th:href="@{/infirmier/medicaments}" class="btn btn-outline">
+                ← Retour à la liste
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-body">
+                <!-- CORRECTION : Actions du formulaire -->
+                <form th:action="${medicament?.id != null} ? 
+                                @{/infirmier/medicaments/modifier/{id}(id=${medicament.id})} : 
+                                @{/infirmier/medicaments/enregistrer}" 
+                      method="post" th:object="${medicament}">
+                    
+                    <!-- Informations de base -->
+                    <div class="form-section">
+                        <h3>💊 Informations du Médicament</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom du médicament *</label>
+                                <input type="text" id="nom" th:field="*{nom}" required class="form-control"
+                                       placeholder="Ex: Doliprane, Ventoline...">
+                                <div class="error-message" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="principeActif">Principe actif</label>
+                                <input type="text" id="principeActif" th:field="*{principeActif}" class="form-control"
+                                       placeholder="Ex: Paracétamol, Salbutamol...">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="forme">Forme pharmaceutique *</label>
+                                <select id="forme" th:field="*{forme}" required class="form-control">
+                                    <option value="">Sélectionnez une forme</option>
+                                    <option value="COMPRIME">Comprimé</option>
+                                    <option value="GELULE">Gélule</option>
+                                    <option value="SIROP">Sirop</option>
+                                    <option value="POUDRE">Poudre</option>
+                                    <option value="POMMADE">Pommade</option>
+                                    <option value="INJECTABLE">Injectable</option>
+                                    <option value="SUPPOSITOIRE">Suppositoire</option>
+                                    <option value="AEROSOL">Aérosol</option>
+                                    <option value="COLLYRE">Collyre</option>
+                                    <option value="SOLUTION">Solution</option>
+                                    <option value="GEL">Gel</option>
+                                </select>
+                                <div class="error-message" th:if="${#fields.hasErrors('forme')}" th:errors="*{forme}"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="laboratoire">Laboratoire</label>
+                                <input type="text" id="laboratoire" th:field="*{laboratoire}" class="form-control"
+                                       placeholder="Ex: Sanofi, Pfizer...">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dosage">Dosage</label>
+                                <input type="number" id="dosage" th:field="*{dosage}" step="0.01" min="0" 
+                                       class="form-control" placeholder="Ex: 500, 10.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="unite">Unité</label>
+                                <select id="unite" th:field="*{unite}" class="form-control">
+                                    <option value="">Sélectionnez une unité</option>
+                                    <option value="mg">mg</option>
+                                    <option value="g">g</option>
+                                    <option value="ml">ml</option>
+                                    <option value="L">L</option>
+                                    <option value="UI">UI</option>
+                                    <option value="%">%</option>
+                                    <option value="mcg">mcg</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="codeATC">Code ATC</label>
+                                <input type="text" id="codeATC" th:field="*{codeATC}" class="form-control"
+                                       placeholder="Ex: N02BE01, R03AC02...">
+                                <small class="form-text">Classification Anatomique Thérapeutique Chimique</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/infirmier/medicaments}" class="btn btn-outline">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <span th:if="${medicament?.id != null}">💾 Modifier le médicament</span>
+                            <span th:if="${medicament?.id == null}">➕ Créer le médicament</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

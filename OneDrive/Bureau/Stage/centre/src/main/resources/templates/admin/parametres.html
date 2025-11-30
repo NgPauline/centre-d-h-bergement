@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Paramètres - Centre Médical</title>
+    <link rel="stylesheet" th:href="@{/css/pages/admin/parametres.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Paramètres du Système</h1>
+        </div>
+
+        <div class="settings-container">
+            <!-- Paramètres généraux -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Paramètres Généraux</h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/parametres}" method="post">
+                        <div class="row">
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="form-label">Nom du centre</label>
+                                    <input type="text" name="nomCentre" th:value="${parametres.nomCentre}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="form-label">Adresse</label>
+                                    <input type="text" name="adresse" th:value="${parametres.adresse}" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="form-label">Téléphone</label>
+                                    <input type="tel" name="telephone" th:value="${parametres.telephone}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="email" th:value="${parametres.email}" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Paramètres de sécurité -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Paramètres de Sécurité</h3>
+                </div>
+                <div class="card-body">
+                    <div class="security-settings">
+                        <div class="security-item">
+                            <h4>Durée de session</h4>
+                            <p>Durée maximale d'inactivité avant déconnexion automatique</p>
+                            <select class="form-control">
+                                <option>30 minutes</option>
+                                <option>1 heure</option>
+                                <option>2 heures</option>
+                                <option>4 heures</option>
+                            </select>
+                        </div>
+
+                        <div class="security-item">
+                            <h4>Complexité des mots de passe</h4>
+                            <p>Exiger une complexité minimale pour les mots de passe</p>
+                            <select class="form-control">
+                                <option>Faible (6 caractères minimum)</option>
+                                <option>Moyenne (8 caractères avec chiffres)</option>
+                                <option>Forte (10 caractères avec chiffres et symboles)</option>
+                            </select>
+                        </div>
+
+                        <div class="security-item">
+                            <h4>Verrouillage de compte</h4>
+                            <p>Verrouiller le compte après plusieurs tentatives infructueuses</p>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" checked>
+                                <label class="form-check-label">Activer le verrouillage</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sauvegarde et maintenance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Sauvegarde et Maintenance</h3>
+                </div>
+                <div class="card-body">
+                    <div class="maintenance-actions">
+                        <div class="action-item">
+                            <h4>Sauvegarde manuelle</h4>
+                            <p>Créer une sauvegarde complète de la base de données</p>
+                            <button class="btn btn-outline" onclick="creerSauvegarde()">Créer sauvegarde</button>
+                        </div>
+
+                        <div class="action-item">
+                            <h4>Nettoyage des logs</h4>
+                            <p>Supprimer les logs anciens pour libérer de l'espace</p>
+                            <button class="btn btn-outline" onclick="nettoyerLogs()">Nettoyer les logs</button>
+                        </div>
+
+                        <div class="action-item">
+                            <h4>Statistiques système</h4>
+                            <p>Voir les statistiques d'utilisation du système</p>
+                            <button class="btn btn-outline" onclick="afficherStatistiques()">Afficher stats</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

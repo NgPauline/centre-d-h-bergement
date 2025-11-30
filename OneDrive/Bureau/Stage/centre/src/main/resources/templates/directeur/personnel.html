@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion du Personnel - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion du Personnel</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>👥</i> Nouveau Personnel
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPersonnel">0</div>
+                <div class="stat-label">Total personnel</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" id="activePersonnel">0</div>
+                <div class="stat-label">Actifs</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-number" id="cdiCount">0</div>
+                <div class="stat-label">CDI</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="avgSeniority">0</div>
+                <div class="stat-label">Ancienneté moy.</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Type de contrat:</label>
+                <select id="contractFilter" onchange="loadPersonnel()">
+                    <option value="">Tous les contrats</option>
+                    <option value="CDI">CDI</option>
+                    <option value="CDD">CDD</option>
+                    <option value="INTERIM">Intérim</option>
+                    <option value="BENEVOLE">Bénévole</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Rôle:</label>
+                <select id="roleFilter" onchange="loadPersonnel()">
+                    <option value="">Tous les rôles</option>
+                    <option value="INFIRMIER">Infirmier</option>
+                    <option value="AIDE_SOIGNANT">Aide-soignant</option>
+                    <option value="EDUCATEUR">Éducateur</option>
+                    <option value="COMPTABLE">Comptable</option>
+                    <option value="SECRETAIRE">Secrétaire</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchPersonnel" placeholder="Rechercher..." onkeyup="searchPersonnel()">
+            </div>
+        </div>
+
+        <!-- Liste du personnel -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Liste du Personnel</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="exportPersonnel()">
+                        <i>📤</i> Exporter
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Matricule</th>
+                            <th>Nom & Prénom</th>
+                            <th>Poste</th>
+                            <th>Contrat</th>
+                            <th>Date embauche</th>
+                            <th>Salaire</th>
+                            <th>Contact</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personnelTableBody">
+                        <!-- Chargé dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Personnel -->
+    <div id="personnelModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouveau Membre du Personnel</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="personnelForm" onsubmit="submitPersonnelForm(event)">
+                    <input type="hidden" id="personnelId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="matricule">Matricule *</label>
+                            <input type="text" id="matricule" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateEmbauche">Date d'embauche *</label>
+                            <input type="date" id="dateEmbauche" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" id="telephone">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typeContrat">Type de contrat *</label>
+                            <select id="typeContrat" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="CDI">CDI</option>
+                                <option value="CDD">CDD</option>
+                                <option value="INTERIM">Intérim</option>
+                                <option value="BENEVOLE">Bénévole</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="salaire">Salaire (€)</label>
+                            <input type="number" id="salaire" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- Section compte utilisateur -->
+                    <div class="section-divider">
+                        <h4>Compte Utilisateur</h4>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">Nom d'utilisateur</label>
+                            <input type="text" id="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" id="password">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Rôle *</label>
+                        <select id="role" required>
+                            <option value="">Sélectionnez un rôle</option>
+                            <option value="INFIRMIER">Infirmier</option>
+                            <option value="AIDE_SOIGNANT">Aide-soignant</option>
+                            <option value="EDUCATEUR">Éducateur</option>
+                            <option value="COMPTABLE">Comptable</option>
+                            <option value="SECRETAIRE">Secrétaire</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

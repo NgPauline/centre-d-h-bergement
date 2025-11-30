@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title th:text="${resident.id != null} ? 'Modifier Résident' : 'Nouveau Résident'">Formulaire Résident</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" th:text="${resident.id != null} ? 'Modifier le Résident' : 'Nouveau Résident'"></h1>
+            <a th:href="@{/residents/liste}" class="btn btn-outline">
+                <i>←</i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="${resident.id != null} ? @{/residents/{id}/modifier(id=${resident.id})} : @{/residents/nouveau}" 
+                      method="post" th:object="${resident}">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" th:field="*{nom}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" th:field="*{prenom}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateNaissance">Date de naissance *</label>
+                            <input type="date" id="dateNaissance" th:field="*{dateNaissance}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="numeroNational">Numéro national</label>
+                            <input type="text" id="numeroNational" th:field="*{numeroNational}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typeHandicap">Type de handicap *</label>
+                            <select id="typeHandicap" th:field="*{typeHandicap}" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option th:each="type : ${typesHandicap}" 
+                                        th:value="${type}" 
+                                        th:text="${type}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="degreHandicap">Degré de handicap (1-10)</label>
+                            <input type="number" id="degreHandicap" th:field="*{degreHandicap}" min="1" max="10">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateAdmission">Date d'admission</label>
+                            <input type="date" id="dateAdmission" th:field="*{dateAdmission}">
+                        </div>
+                        <div class="form-group">
+                            <label for="statut">Statut *</label>
+                            <select id="statut" th:field="*{statut}" required>
+                                <option value="">Sélectionnez un statut</option>
+                                <option th:each="statut : ${statuts}" 
+                                        th:value="${statut}" 
+                                        th:text="${statut}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" id="telephone" th:field="*{telephone}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" th:field="*{email}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observations">Observations</label>
+                        <textarea id="observations" th:field="*{observations}" rows="3" placeholder="Observations médicales ou comportementales..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="besoinInfirmier" th:field="*{besoinInfirmier}">
+                                <span class="checkmark"></span>
+                                Besoin de soins infirmiers réguliers
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="besoinAideSoignant" th:field="*{besoinAideSoignant}">
+                                <span class="checkmark"></span>
+                                Besoin d'aide-soignant
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/residents/liste}" class="btn btn-outline">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i th:text="${resident.id != null} ? '💾' : '➕'"></i>
+                            <span th:text="${resident.id != null} ? 'Modifier' : 'Créer le résident'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

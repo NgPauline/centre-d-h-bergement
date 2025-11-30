@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Détails Résident</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">👴 Détails du Résident</h1>
+            <a th:href="@{/residents/liste}" class="btn btn-outline">
+                ← Retour à la liste
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Informations personnelles</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <p><strong>ID :</strong> <span th:text="${resident.id}"></span></p>
+                        <p><strong>Nom :</strong> <span th:text="${resident.nom}"></span></p>
+                        <p><strong>Prénom :</strong> <span th:text="${resident.prenom}"></span></p>
+                        <p><strong>Date de naissance :</strong>
+                            <span th:if="${resident.dateNaissance != null}" 
+                                  th:text="${#temporals.format(resident.dateNaissance, 'dd/MM/yyyy')}">
+                            </span>
+                            <span th:if="${resident.dateNaissance == null}" class="text-muted">
+                                Non renseignée
+                            </span>
+                        </p>
+                        <p><strong>Numéro national :</strong> 
+                            <span th:text="${resident.numeroNational} ?: 'Non renseigné'"></span>
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p><strong>Type d'handicap :</strong> 
+                            <span class="badge" th:text="${resident.typeHandicap} ?: 'Non spécifié'"></span>
+                        </p>
+                        <p><strong>Degré de handicap :</strong> 
+                            <span th:text="${resident.degreHandicap} ?: 'Non spécifié'"></span>
+                        </p>
+                        <p><strong>Statut :</strong>
+                            <span class="badge" 
+                                  th:classappend="${resident.statut == 'ACTIF'} ? 'badge-success' : 
+                                                 (${resident.statut == 'INACTIF'} ? 'badge-warning' : 'badge-secondary')"
+                                  th:text="${resident.statut} ?: 'ACTIF'">
+                            </span>
+                        </p>
+                        <p><strong>Date d'admission :</strong>
+                            <span th:if="${resident.dateAdmission != null}" 
+                                  th:text="${#temporals.format(resident.dateAdmission, 'dd/MM/yyyy')}">
+                            </span>
+                            <span th:if="${resident.dateAdmission == null}" class="text-muted">
+                                Non renseignée
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Coordonnées -->
+                <div class="section-divider">
+                    <h3>Coordonnées</h3>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p><strong>Téléphone :</strong> 
+                            <span th:text="${resident.telephone} ?: 'Non renseigné'"></span>
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p><strong>Email :</strong> 
+                            <span th:text="${resident.email} ?: 'Non renseigné'"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Besoins spécifiques -->
+                <div class="section-divider">
+                    <h3>Besoins spécifiques</h3>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p><strong>Besoin infirmier :</strong>
+                            <span th:if="${resident.besoinInfirmier}" class="badge badge-warning">OUI</span>
+                            <span th:unless="${resident.besoinInfirmier}" class="badge badge-secondary">NON</span>
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p><strong>Besoin aide-soignant :</strong>
+                            <span th:if="${resident.besoinAideSoignant}" class="badge badge-warning">OUI</span>
+                            <span th:unless="${resident.besoinAideSoignant}" class="badge badge-secondary">NON</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Observations -->
+                <div th:if="${resident.observations}" class="section-divider">
+                    <h3>Observations</h3>
+                    <p th:text="${resident.observations}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-buttons" style="margin-top: 20px;">
+            <a th:href="@{/residents/{id}/modifier(id=${resident.id})}" 
+               class="btn btn-primary">
+                ✏️ Modifier
+            </a>
+            <form th:action="@{/residents/{id}/supprimer(id=${resident.id})}" 
+                  method="post" 
+                  style="display: inline;"
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce résident ?');">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Supprimer
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

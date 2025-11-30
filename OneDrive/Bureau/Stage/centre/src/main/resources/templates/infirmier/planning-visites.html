@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Planning des Visites - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Planning des Visites</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>🏥</i> Nouvelle Visite
+            </button>
+        </div>
+
+        <!-- Alertes visites -->
+        <div id="visiteAlerts" class="alerts-container">
+            <!-- Alertes dynamiques -->
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card warning" onclick="filterByStatus('planifiees')">
+                <div class="stat-number" id="plannedCount">0</div>
+                <div class="stat-label">Planifiées</div>
+            </div>
+            <div class="stat-card danger" onclick="filterByStatus('en-retard')">
+                <div class="stat-number" id="lateCount">0</div>
+                <div class="stat-label">En retard</div>
+            </div>
+            <div class="stat-card success" onclick="filterByStatus('effectuees')">
+                <div class="stat-number" id="doneCount">0</div>
+                <div class="stat-label">Effectuées</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="todayCount">0</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Résident:</label>
+                <select id="residentFilter" onchange="loadPlanningVisites()">
+                    <option value="">Tous les résidents</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Soignant:</label>
+                <select id="soignantFilter" onchange="loadPlanningVisites()">
+                    <option value="">Tous les soignants</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadPlanningVisites()">
+                    <option value="all">Tous</option>
+                    <option value="planifiees">Planifiées</option>
+                    <option value="en-retard">En retard</option>
+                    <option value="effectuees">Effectuées</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Date:</label>
+                <input type="date" id="dateFilter" onchange="loadPlanningVisites()">
+            </div>
+        </div>
+
+        <!-- Vue planning -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Planning des Visites</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="refreshPlanning()">
+                        <i>🔄</i> Actualiser
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="visitesTimeline" class="timeline-view">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Visite -->
+    <div id="visiteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Visite</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="visiteForm" onsubmit="submitVisiteForm(event)">
+                    <input type="hidden" id="visiteId">
+                    
+                    <div class="form-group">
+                        <label for="visiteResidentId">Résident *</label>
+                        <select id="visiteResidentId" required>
+                            <option value="">Sélectionnez un résident</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="visiteSoignantId">Soignant *</label>
+                        <select id="visiteSoignantId" required>
+                            <option value="">Sélectionnez un soignant</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateVisite">Date de la visite *</label>
+                            <input type="date" id="dateVisite" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="heureVisite">Heure *</label>
+                            <input type="time" id="heureVisite" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="typeVisite">Type de visite *</label>
+                        <select id="typeVisite" required>
+                            <option value="">Sélectionnez</option>
+                            <option value="SOINS">Soins</option>
+                            <option value="CONTROLE">Contrôle</option>
+                            <option value="URGENCE">Urgence</option>
+                            <option value="SUIVI">Suivi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="soinsPrevus">Soins prévus</label>
+                        <textarea id="soinsPrevus" rows="2" placeholder="Soins à réaliser..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Planifier la visite</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Effectuer Visite -->
+    <div id="effectuerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Effectuer la Visite</h3>
+                <span class="close" onclick="closeEffectuerModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="visite-info">
+                    <h4 id="effectuerResident"></h4>
+                    <p><strong>Date prévue:</strong> <span id="effectuerDate"></span></p>
+                    <p><strong>Soins prévus:</strong> <span id="effectuerSoinsPrevus"></span></p>
+                </div>
+
+                <form onsubmit="markVisiteDone(event)">
+                    <input type="hidden" id="effectuerVisiteId">
+                    
+                    <div class="form-group">
+                        <label for="soinsRealises">Soins réalisés *</label>
+                        <textarea id="soinsRealises" rows="3" required placeholder="Détail des soins effectués..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observationsVisite">Observations</label>
+                        <textarea id="observationsVisite" rows="2" placeholder="Observations médicales..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeEffectuerModal()">Annuler</button>
+                        <button type="submit" class="btn btn-success">Marquer comme effectuée</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reprogrammer -->
+    <div id="reprogrammerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reprogrammer la Visite</h3>
+                <span class="close" onclick="closeReprogrammerModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="reprogrammerVisite(event)">
+                    <input type="hidden" id="reprogrammerVisiteId">
+                    
+                    <div class="form-group">
+                        <label for="motifReprogrammation">Motif de reprogrammation *</label>
+                        <textarea id="motifReprogrammation" rows="2" required placeholder="Raison de la reprogrammation..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeReprogrammerModal()">Annuler</button>
+                        <button type="submit" class="btn btn-warning">Reprogrammer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

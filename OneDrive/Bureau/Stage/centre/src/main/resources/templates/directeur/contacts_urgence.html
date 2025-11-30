@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Contacts d'Urgence - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/details.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Contacts d'Urgence</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>📞</i> Nouveau Contact
+            </button>
+        </div>
+
+        <!-- Sélection du résident -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Résident:</label>
+                <select id="residentFilter" onchange="loadContacts()" required>
+                    <option value="">Sélectionnez un résident</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Contacts du résident sélectionné -->
+        <div id="contactsContainer" style="display: none;">
+            <!-- En-tête résident -->
+            <div class="resident-header">
+                <h3 id="residentName"></h3>
+                <span class="badge" id="contactsCount">0 contacts</span>
+            </div>
+
+            <!-- Liste des contacts -->
+            <div class="contacts-grid">
+                <div id="contactsList">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Contact principal -->
+            <div class="card primary-contact">
+                <div class="card-header">
+                    <h4>👑 Contact Principal</h4>
+                </div>
+                <div class="card-body">
+                    <div id="primaryContact">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun résident sélectionné -->
+        <div id="noResidentMessage" class="empty-state">
+            <div class="empty-icon">👤</div>
+            <h3>Sélectionnez un résident</h3>
+            <p>Veuillez sélectionner un résident pour afficher et gérer ses contacts d'urgence.</p>
+        </div>
+    </main>
+
+    <!-- Modal Contact -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouveau Contact d'Urgence</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm" onsubmit="submitContactForm(event)">
+                    <input type="hidden" id="contactId">
+                    <input type="hidden" id="contactResidentId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lienParente">Lien de parenté *</label>
+                            <select id="lienParente" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="CONJOINT">Conjoint(e)</option>
+                                <option value="ENFANT">Enfant</option>
+                                <option value="PARENT">Parent</option>
+                                <option value="FRERE_SOEUR">Frère/Sœur</option>
+                                <option value="AMI">Ami</option>
+                                <option value="TUTEUR">Tuteur</option>
+                                <option value="AUTRE">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telephone">Téléphone *</label>
+                            <input type="tel" id="telephone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="contactPrincipal">
+                            <span class="checkmark"></span>
+                            Définir comme contact principal
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/pages/chambres/details.js}"></script>
+</body>
+</html>

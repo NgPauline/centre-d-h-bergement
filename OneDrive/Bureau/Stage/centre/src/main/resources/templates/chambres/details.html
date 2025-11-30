@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la Chambre</title>
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/details.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🏠 Détails de la Chambre</h1>
+            <a th:href="@{/chambres/liste}" class="btn btn-outline">
+                ← Retour à la liste
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div th:if="${chambre}" class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    Chambre <span th:text="${chambre.numero}"></span>
+                    <span th:if="${chambre.description}" style="font-weight: normal; color: #6c757d; margin-left: 0.5rem;">
+                        - <span th:text="${chambre.description}"></span>
+                    </span>
+                </h2>
+            </div>
+
+            <div class="card-body">
+                <!-- Informations générales -->
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Numéro</span>
+                        <span class="info-value" th:text="${chambre.numero}"></span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Étage</span>
+                        <span class="info-value" th:text="${chambre.etage}"></span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Type</span>
+                        <span class="badge badge-primary" th:text="${chambre.type}"></span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Capacité maximale</span>
+                        <span class="info-value" th:text="${chambre.capacite} + ' personnes'"></span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Accessibilité PMR</span>
+                        <span th:if="${chambre.accessible}" class="badge badge-success">✅ Accessible</span>
+                        <span th:unless="${chambre.accessible}" class="badge badge-secondary">❌ Non accessible</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Statut</span>
+                        <div th:if="${chambre.estDisponible()}" class="status-indicator status-available">
+                            <span>✅</span>
+                            <span>Disponible</span>
+                        </div>
+                        <div th:if="${chambre.estPleine()}" class="status-indicator status-full">
+                            <span>🔴</span>
+                            <span>Pleine</span>
+                        </div>
+                        <div th:if="${!chambre.estDisponible() && !chambre.estPleine()}" class="status-indicator status-occupied">
+                            <span>🟡</span>
+                            <span>Occupée</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Taux d'occupation</span>
+                        <div th:with="occupation=${chambre.residents?.size() ?: 0}, 
+                                     taux=${(chambre.residents?.size() ?: 0) / chambre.capacite * 100}">
+                            <span class="info-value" th:text="${occupation + '/' + chambre.capacite + ' (' + #numbers.formatDecimal(taux, 0, 0) + '%)'}"></span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" 
+                                     th:classappend="${taux >= 80} ? 'high' : (${taux >= 50} ? 'medium' : '')"
+                                     th:style="'width: ' + ${taux} + '%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Équipements -->
+                <div th:if="${chambre.equipements != null && !chambre.equipements.isEmpty()}" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">🛏️ Équipements</h3>
+                    <div class="equipments-list">
+                        <span th:each="equipement : ${chambre.equipements}" class="equipment-tag" th:text="${equipement}"></span>
+                    </div>
+                </div>
+
+                <!-- Liste des occupants -->
+                <div>
+                    <h3 style="margin-bottom: 1rem;">👥 Occupants actuels 
+                        <span class="badge badge-info" th:text="'(' + (chambre.residents?.size() ?: 0) + ')'"></span>
+                    </h3>
+                    
+                    <div th:if="${chambre.residents != null && !chambre.residents.isEmpty()}" class="occupants-list">
+                        <div th:each="resident : ${chambre.residents}" class="occupant-card">
+                            <div class="occupant-avatar" th:text="${resident.prenom.substring(0, 1) + resident.nom.substring(0, 1)}"></div>
+                            <div class="occupant-info">
+                                <div class="occupant-name" th:text="${resident.prenom + ' ' + resident.nom}"></div>
+                                <div class="occupant-details">
+                                    <span th:text="${resident.age} + ' ans'"></span>
+                                    <span th:if="${resident.dateNaissance}" th:text="'Né(e) le ' + ${#temporals.format(resident.dateNaissance, 'dd/MM/yyyy')}"></span>
+                                    <span th:if="${resident.genre}" th:text="${resident.genre}"></span>
+                                </div>
+                            </div>
+                            <a th:href="@{/residents/{id}(id=${resident.id})}" class="btn btn-outline">
+                                👁️ Voir fiche
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${chambre.residents == null || chambre.residents.isEmpty()}" class="empty-state">
+                        <p>Aucun occupant dans cette chambre</p>
+                        <p th:if="${chambre.estDisponible()}" style="color: #28a745; font-style: normal;">
+                            ✅ Chambre disponible pour de nouveaux résidents
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="action-buttons">
+                    <a th:href="@{/chambres/liste}" class="btn btn-outline">
+                        ← Retour à la liste
+                    </a>
+                    
+                    <a th:href="@{/chambres/{id}/modifier(id=${chambre.id})}" class="btn btn-primary">
+                        ✏️ Modifier la chambre
+                    </a>
+                    
+                    <div th:if="${chambre.estDisponible()}" style="display: flex; gap: 0.5rem;">
+                        <a th:href="@{/residents/nouveau?chambreId={id}(id=${chambre.id})}" class="btn btn-success">
+                            👤 Ajouter un résident
+                        </a>
+                    </div>
+                    
+                    <form th:action="@{/chambres/{id}/supprimer(id=${chambre.id})}" 
+                          method="post" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette chambre ? Cette action est irréversible.');">
+                        <button type="submit" class="btn btn-danger">
+                            🗑️ Supprimer la chambre
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:unless="${chambre}" class="card">
+            <div class="card-body">
+                <div class="empty-state">
+                    <p>Chambre non trouvée</p>
+                    <a th:href="@{/chambres/liste}" class="btn btn-primary" style="margin-top: 1rem;">
+                        ← Retour à la liste des chambres
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/chambres.js}"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion des Factures - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Factures</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>🧾</i> Nouvelle Facture
+            </button>
+        </div>
+
+        <!-- Alertes factures -->
+        <div id="invoiceAlerts" class="alerts-container">
+            <!-- Alertes dynamiques -->
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card danger" onclick="filterByStatus('EN_RETARD')">
+                <div class="stat-number" id="overdueCount">0</div>
+                <div class="stat-label">En retard</div>
+            </div>
+            <div class="stat-card warning" onclick="filterByStatus('EMISE')">
+                <div class="stat-number" id="issuedCount">0</div>
+                <div class="stat-label">En attente</div>
+            </div>
+            <div class="stat-card success" onclick="filterByStatus('PAYEE')">
+                <div class="stat-number" id="paidCount">0</div>
+                <div class="stat-label">Payées</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="totalRevenue">0 €</div>
+                <div class="stat-label">Chiffre d'affaires</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadFactures()">
+                    <option value="all">Tous les statuts</option>
+                    <option value="BROUILLON">Brouillon</option>
+                    <option value="EMISE">Emise</option>
+                    <option value="PAYEE">Payée</option>
+                    <option value="PARTIELLEMENT_PAYEE">Partiellement payée</option>
+                    <option value="EN_RETARD">En retard</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Résident:</label>
+                <select id="residentFilter" onchange="loadFactures()">
+                    <option value="">Tous les résidents</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Période:</label>
+                <input type="month" id="periodFilter" onchange="loadFactures()">
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchInvoice" placeholder="Rechercher facture..." onkeyup="searchFactures()">
+            </div>
+        </div>
+
+        <!-- Liste des factures -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Factures</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="exportFactures()">
+                        <i>📤</i> Exporter
+                    </button>
+                    <button class="btn btn-outline" onclick="generateReports()">
+                        <i>📊</i> Rapports
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Numéro</th>
+                            <th>Résident</th>
+                            <th>Date émission</th>
+                            <th>Date échéance</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Retard</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facturesTableBody">
+                        <!-- Chargé dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Facture -->
+    <div id="factureModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Facture</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="factureForm" onsubmit="submitFactureForm(event)">
+                    <input type="hidden" id="factureId">
+                    
+                    <div class="form-group">
+                        <label for="factureResidentId">Résident *</label>
+                        <select id="factureResidentId" required onchange="loadResidentServices()">
+                            <option value="">Sélectionnez un résident</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateEmission">Date d'émission *</label>
+                            <input type="date" id="dateEmission" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateEcheance">Date d'échéance *</label>
+                            <input type="date" id="dateEcheance" required>
+                        </div>
+                    </div>
+
+                    <!-- Lignes de facture -->
+                    <div class="invoice-lines">
+                        <h4>Lignes de facture</h4>
+                        <div id="invoiceLines">
+                            <div class="invoice-line">
+                                <div class="line-row">
+                                    <select class="service-type" onchange="updateLinePrice(this)">
+                                        <option value="">Sélectionnez un service</option>
+                                        <option value="HEBERGEMENT">Hébergement</option>
+                                        <option value="SOINS_MEDICAUX">Soins médicaux</option>
+                                        <option value="ACTIVITES">Activités</option>
+                                        <option value="REPAS">Repas</option>
+                                        <option value="TRANSPORT">Transport</option>
+                                        <option value="AUTRE">Autre</option>
+                                    </select>
+                                    <input type="text" class="line-description" placeholder="Description">
+                                    <input type="number" class="line-quantity" value="1" min="1" onchange="calculateLineTotal(this)">
+                                    <input type="number" class="line-price" step="0.01" min="0" onchange="calculateLineTotal(this)">
+                                    <span class="line-total">0.00 €</span>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeLine(this)">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="addLine()">
+                            <i>➕</i> Ajouter une ligne
+                        </button>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="invoice-total">
+                        <h4>Total: <span id="invoiceTotal">0.00</span> €</h4>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="2" placeholder="Notes internes..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer la facture</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Paiement -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Enregistrer un Paiement</h3>
+                <span class="close" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="invoice-info">
+                    <h4 id="paymentInvoiceNumber"></h4>
+                    <p><strong>Résident:</strong> <span id="paymentResident"></span></p>
+                    <p><strong>Montant dû:</strong> <span id="paymentDue"></span> €</p>
+                </div>
+
+                <form onsubmit="processPayment(event)">
+                    <input type="hidden" id="paymentInvoiceId">
+                    
+                    <div class="form-group">
+                        <label for="paymentAmount">Montant payé (€) *</label>
+                        <input type="number" id="paymentAmount" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentDate">Date du paiement *</label>
+                        <input type="date" id="paymentDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentMethod">Mode de paiement *</label>
+                        <select id="paymentMethod" required>
+                            <option value="">Sélectionnez</option>
+                            <option value="VIREMENT">Virement</option>
+                            <option value="CARTE">Carte bancaire</option>
+                            <option value="ESPECES">Espèces</option>
+                            <option value="CHEQUE">Chèque</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentReference">Référence</label>
+                        <input type="text" id="paymentReference" placeholder="Numéro de chèque, virement...">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closePaymentModal()">Annuler</button>
+                        <button type="submit" class="btn btn-success">Enregistrer le paiement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

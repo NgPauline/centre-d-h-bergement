@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/directeur.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🎯 Tableau de bord - Direction</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Directeur -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Vue d'ensemble opérationnelle</h2>
+                <div class="stats-grid directeur-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.totalResidents}">-</div>
+                        <div class="stat-label">Résidents total</div>
+                        <div class="stat-sub" th:text="${stats.residentsActifs} + ' actifs'">- actifs</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number" th:text="${stats.totalChambres}">-</div>
+                        <div class="stat-label">Chambres</div>
+                        <div class="stat-sub" th:text="${stats.chambresDisponibles} + ' disponibles'">- disponibles</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${stats.totalPersonnel}">-</div>
+                        <div class="stat-label">Personnel</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-number" th:text="${stats.facturesEnRetard}">-</div>
+                        <div class="stat-label">Factures en retard</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Actions de direction</h3>
+                <div class="quick-actions">
+                    <a href="/personnel" class="btn btn-primary">
+                        <i>👥</i> Gestion du personnel
+                    </a>
+                    <a href="/rapports" class="btn btn-warning">
+                        <i>📊</i> Rapports opérationnels
+                    </a>
+                    <a href="/chambres" class="btn btn-success">
+                        <i>🏠</i> Occupation chambres
+                    </a>
+                    <a href="/residents" class="btn btn-info">
+                        <i>👴</i> Liste des résidents
+                    </a>
+                </div>
+            </div>
+
+            <!-- Indicateurs de performance -->
+            <div class="performance-metrics">
+                <h3>📈 Indicateurs clés</h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Taux d'occupation</span>
+                        <span class="metric-value">
+                            <span th:if="${stats.totalChambres > 0}" 
+                                  th:text="${#numbers.formatDecimal((stats.totalChambres - stats.chambresDisponibles) / stats.totalChambres * 100, 1, 1)} + '%'">-</span>
+                            <span th:if="${stats.totalChambres == 0}">0%</span>
+                        </span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Ratio personnel/résidents</span>
+                        <span class="metric-value">
+                            <span th:if="${stats.totalResidents > 0}" 
+                                  th:text="${#numbers.formatDecimal(stats.totalPersonnel / stats.totalResidents, 1, 2)}">-</span>
+                            <span th:if="${stats.totalResidents == 0}">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

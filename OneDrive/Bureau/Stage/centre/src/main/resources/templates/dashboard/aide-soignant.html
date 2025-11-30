@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/aide-soignant.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🛁 Tableau de bord - Aide-soignant</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Aide-soignant -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Tableau de bord soins</h2>
+                <div class="stats-grid aide-soignant-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.mesResidents}">-</div>
+                        <div class="stat-label">Mes résidents</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${stats.toilettesEnAttente}">-</div>
+                        <div class="stat-label">Toilettes en attente</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number" th:text="${stats.repasAServir}">-</div>
+                        <div class="stat-label">Repas à servir</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number" th:text="${stats.notesAujourdhui}">-</div>
+                        <div class="stat-label">Notes aujourd'hui</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Tâches quotidiennes</h3>
+                <div class="quick-actions">
+                    <a href="/soins/quotidiens" class="btn btn-primary">
+                        <i>🛁</i> Soins d'hygiène
+                    </a>
+                    <a href="/repas" class="btn btn-success">
+                        <i>🍽️</i> Service repas
+                    </a>
+                    <a href="/notes/nouvelle" class="btn btn-warning">
+                        <i>📝</i> Nouvelle note
+                    </a>
+                    <a href="/mobilisation" class="btn btn-info">
+                        <i>🚶</i> Mobilisations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Planning des soins -->
+            <div class="care-schedule">
+                <h3>⏰ Planning des soins</h3>
+                <div class="schedule-list">
+                    <div class="schedule-item urgent">
+                        <span class="schedule-time">08:00 - 10:00</span>
+                        <span class="schedule-task">Toilettes et habillage</span>
+                        <span class="schedule-residents">5 résidents</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-time">12:00 - 13:30</span>
+                        <span class="schedule-task">Service du déjeuner</span>
+                        <span class="schedule-residents">8 résidents</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-time">16:00 - 17:00</span>
+                        <span class="schedule-task">Goûter et médication</span>
+                        <span class="schedule-residents">6 résidents</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

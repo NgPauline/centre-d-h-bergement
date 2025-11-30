@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Centre d'hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/auth/login.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Centre d'hébergement</h1>
+                <p>Connectez-vous à votre compte</p>
+            </div>
+
+            <!-- FORMULAIRE SPRING SECURITY CORRECT -->
+            <form th:action="@{/login}" method="post">
+                
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username"
+                           required 
+                           autocomplete="username"
+                           th:value="${param.error != null ? (param.username != null ? param.username[0] : '') : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="password-wrapper">
+                        <input type="password" 
+                               id="password" 
+                               name="password"
+                               required 
+                               autocomplete="current-password">
+                        <button type="button" id="passwordToggle" class="password-toggle-btn">
+                            <span class="toggle-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i>🔐</i> Se connecter
+                    </button>
+                </div>
+
+                <!-- MESSAGE D'ERREUR SPRING SECURITY -->
+                <div th:if="${param.error}" class="alert alert-error">
+                    ❌ Identifiants incorrects. Veuillez réessayer.
+                </div>
+                
+                <!-- MESSAGE DE DÉCONNEXION -->
+                <div th:if="${param.logout}" class="alert alert-success">
+                    ✅ Vous avez été déconnecté avec succès.
+                </div>
+            </form>
+
+            <div class="auth-footer" th:if="${param.error}">
+    <p>Problème de connexion ? <a href="#">Contactez l'administrateur</a></p>
+            </div>
+        </div>
+
+        <div class="auth-info">
+            <h2>Bienvenue</h2>
+            <p>Accédez au système de gestion du centre d'hébergement pour personnes handicapées.</p>
+            <div class="role-info">
+                <h3>Rôles disponibles:</h3>
+                <ul>
+                    <li><strong>ADMIN:</strong> Accès complet au système</li>
+                    <li><strong>DIRECTEUR:</strong> Gestion opérationnelle</li>
+                    <li><strong>INFIRMIER:</strong> Soins et médicaments</li>
+                    <li><strong>EDUCATEUR:</strong> Activités et programmes</li>
+                    <li><strong>SECRETAIRE:</strong> Administration</li>
+                    <li><strong>AIDE-SOIGNANT:</strong> Soins</li>
+                    <li><strong>COMPTABLE:</strong> Finances</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/auth.js}"></script>
+</body>
+</html>

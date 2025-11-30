@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Gestion des Chambres - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/liste.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gestion des Chambres</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>🏠</i> Nouvelle Chambre
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalRooms">0</div>
+                <div class="stat-label">Total chambres</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" id="availableRooms">0</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-number" id="occupiedRooms">0</div>
+                <div class="stat-label">Occupées</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="accessibleRooms">0</div>
+                <div class="stat-label">Accessibles</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Type:</label>
+                <select id="typeFilter" onchange="loadChambres()">
+                    <option value="">Tous les types</option>
+                    <option value="SIMPLE">Simple</option>
+                    <option value="DOUBLE">Double</option>
+                    <option value="TRIPLE">Triple</option>
+                    <option value="COLLECTIVE">Collective</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Étage:</label>
+                <select id="floorFilter" onchange="loadChambres()">
+                    <option value="">Tous les étages</option>
+                    <option value="0">Rez-de-chaussée</option>
+                    <option value="1">1er étage</option>
+                    <option value="2">2ème étage</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Statut:</label>
+                <select id="statusFilter" onchange="loadChambres()">
+                    <option value="all">Toutes</option>
+                    <option value="available">Disponibles</option>
+                    <option value="occupied">Occupées</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Vue grille des chambres -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Plan des Chambres</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="toggleView()">
+                        <i id="viewIcon">📋</i> <span id="viewText">Vue liste</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Vue grille -->
+                <div id="gridView" class="rooms-grid">
+                    <!-- Chargé dynamiquement -->
+                </div>
+                
+                <!-- Vue liste -->
+                <div id="listView" class="rooms-list" style="display: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>Étage</th>
+                                <th>Type</th>
+                                <th>Capacité</th>
+                                <th>Occupants</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTableBody">
+                            <!-- Chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Création/Édition -->
+    <div id="chambreModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Chambre</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="chambreForm" onsubmit="submitChambreForm(event)">
+                    <input type="hidden" id="chambreId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numero">Numéro *</label>
+                            <input type="text" id="numero" required placeholder="Ex: 101">
+                        </div>
+                        <div class="form-group">
+                            <label for="etage">Étage *</label>
+                            <input type="number" id="etage" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type">Type *</label>
+                            <select id="type" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="SIMPLE">Simple</option>
+                                <option value="DOUBLE">Double</option>
+                                <option value="TRIPLE">Triple</option>
+                                <option value="COLLECTIVE">Collective</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="capacite">Capacité *</label>
+                            <input type="number" id="capacite" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="2" placeholder="Caractéristiques de la chambre..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="accessible">
+                            <span class="checkmark"></span>
+                            Chambre accessible PMR
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Assignation Résident -->
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Assigner un Résident</h3>
+                <span class="close" onclick="closeAssignModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="room-info">
+                    <h4 id="assignRoomNumber"></h4>
+                    <p><strong>Capacité:</strong> <span id="assignCapacity"></span></p>
+                    <p><strong>Occupants actuels:</strong> <span id="assignCurrent"></span></p>
+                </div>
+
+                <form onsubmit="assignResident(event)">
+                    <input type="hidden" id="assignRoomId">
+                    
+                    <div class="form-group">
+                        <label for="residentSelect">Sélectionner un résident *</label>
+                        <select id="residentSelect" required>
+                            <option value="">Choisir un résident</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeAssignModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Assigner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/pages/chambres/liste.js}"></script>
+</body>
+</html>

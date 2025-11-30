@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head th:replace="fragments/header :: head">
+    <title>Recherche Personnel</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🔍 Recherche de Personnel</h1>
+            <div class="header-actions">
+                <a th:href="@{/personnel/liste}" class="btn btn-outline">
+                    ← Retour à la liste
+                </a>
+                <a th:href="@{/personnel/nouveau}" class="btn btn-primary" sec:authorize="hasAnyRole('DIRECTEUR', 'SECRETAIRE')">
+                    ➕ Nouveau Personnel
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-body">
+                <!-- Formulaire de recherche simple -->
+                <form th:action="@{/personnel/recherche}" method="get" class="search-form">
+                    <div class="form-group">
+                        <label for="nom" class="form-label">Rechercher par nom :</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="nom" 
+                                   name="nom" 
+                                   class="form-control" 
+                                   placeholder="Entrez un nom pour rechercher..." 
+                                   th:value="${param.nom}"
+                                   aria-label="Rechercher par nom">
+                            <button type="submit" class="btn btn-primary">
+                                🔍 Rechercher
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Saisissez tout ou partie du nom du membre du personnel que vous recherchez.
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Résultats de la recherche -->
+                <div th:if="${resultats != null}">
+                    <div class="results-header" style="margin-top: 2rem;">
+                        <h3>📊 Résultats de la recherche</h3>
+                        <div class="results-count">
+                            <span class="badge badge-info" th:text="${#lists.size(resultats)} + ' résultat(s) trouvé(s)'"></span>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(resultats) && param.nom != null}" class="alert alert-info">
+                        <p>Aucun membre du personnel trouvé pour "<strong th:text="${param.nom}"></strong>".</p>
+                        <p class="mb-0">Vérifiez l'orthographe ou essayez avec un terme de recherche différent.</p>
+                    </div>
+
+                    <div th:if="${param.nom == null}" class="alert alert-warning">
+                        <p>Veuillez saisir un nom dans le champ de recherche pour afficher les résultats.</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(resultats)}" class="table-responsive" style="margin-top: 1rem;">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Matricule</th>
+                                    <th>Nom</th>
+                                    <th>Prénom</th>
+                                    <th>Poste</th>
+                                    <th>Date embauche</th>
+                                    <th>Ancienneté</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="personnel : ${resultats}">
+                                    <td th:text="${personnel.matricule}"></td>
+                                    <td th:text="${personnel.nom}"></td>
+                                    <td th:text="${personnel.prenom}"></td>
+                                    <td>
+                                        <span class="badge" th:text="${personnel.poste}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${personnel.dateEmbauche != null}" 
+                                              th:text="${#temporals.format(personnel.dateEmbauche, 'dd/MM/yyyy')}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${personnel.calculerAnciennete()} + ' ans'"></td>
+                                    <td th:text="${personnel.email} ?: '-'"></td>
+                                    <td th:text="${personnel.telephone} ?: '-'"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a th:href="@{/personnel/{id}(id=${personnel.id})}" 
+                                               class="btn btn-sm btn-outline" title="Voir détails">
+                                                👁️
+                                            </a>
+                                            <a th:href="@{/personnel/{id}/modifier(id=${personnel.id})}" 
+                                               class="btn btn-sm btn-primary" title="Modifier"
+                                               sec:authorize="hasAnyRole('DIRECTEUR', 'SECRETAIRE')">
+                                                ✏️
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Actions supplémentaires -->
+                    <div th:if="${!#lists.isEmpty(resultats)}" class="action-buttons" style="margin-top: 1.5rem;">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline" onclick="window.print()">
+                                🖨️ Imprimer les résultats
+                            </button>
+                            <a th:href="@{/personnel/liste}" class="btn btn-sm btn-outline">
+                                📋 Voir tout le personnel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggestions si aucun résultat -->
+                <div th:if="${#lists.isEmpty(resultats) && param.nom != null}" class="suggestions" style="margin-top: 2rem;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>💡 Suggestions :</h5>
+                            <ul class="mb-0">
+                                <li>Vérifiez l'orthographe du nom</li>
+                                <li>Essayez avec seulement une partie du nom</li>
+                                <li>La recherche ne tient pas compte des accents</li>
+                                <li>Consultez la <a th:href="@{/personnel/liste}">liste complète du personnel</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

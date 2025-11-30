@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Administration - Centre Médical</title>
+    <link rel="stylesheet" th:href="@{/css/pages/admin/utilisateurs.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Administration des Utilisateurs</h1>
+            <div class="actions">
+                <a th:href="@{/admin/utilisateurs/nouveau}" class="btn btn-primary">
+                    <i>➕</i> Nouvel Utilisateur
+                </a>
+            </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Utilisateurs du Système</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom d'utilisateur</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Personnel associé</th>
+                                <th>Statut</th>
+                                <th>Dernière connexion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="utilisateur : ${utilisateurs}">
+                                <td>
+                                    <strong th:text="${utilisateur.username}"></strong>
+                                </td>
+                                <td th:text="${utilisateur.email}"></td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${utilisateur.role == 'ADMINISTRATEUR'} ? 'badge-danger' :
+                                                         (utilisateur.role == 'DIRECTEUR'} ? 'badge-warning' :
+                                                         'badge-info'"
+                                          th:text="${utilisateur.role}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${utilisateur.personnel}"
+                                          th:text="${utilisateur.personnel.nomComplet}"></span>
+                                    <span th:unless="${utilisateur.personnel}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span th:if="${utilisateur.actif}" class="badge badge-success">Actif</span>
+                                    <span th:unless="${utilisateur.actif}" class="badge badge-secondary">Inactif</span>
+                                </td>
+                                <td>
+                                    <span th:if="${utilisateur.derniereConnexion}"
+                                          th:text="${#dates.format(utilisateur.derniereConnexion, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <span th:unless="${utilisateur.derniereConnexion}" class="text-muted">Jamais</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a th:href="@{/admin/utilisateurs/{id}/modifier(id=${utilisateur.id})}" 
+                                           class="btn btn-sm btn-outline">Modifier</a>
+                                        <button th:if="${utilisateur.actif}"
+                                                th:onclick="'desactiverUtilisateur(' + ${utilisateur.id} + ')'"
+                                                class="btn btn-sm btn-warning">Désactiver</button>
+                                        <button th:unless="${utilisateur.actif}"
+                                                th:onclick="'activerUtilisateur(' + ${utilisateur.id} + ')'"
+                                                class="btn btn-sm btn-success">Activer</button>
+                                        <button th:if="${utilisateur.id != #authentication.principal.id}"
+                                                th:onclick="'reinitialiserMotDePasse(' + ${utilisateur.id} + ')'"
+                                                class="btn btn-sm btn-outline">Réinit MDP</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs d'activité -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Logs d'Activité Récente</h3>
+            </div>
+            <div class="card-body">
+                <div class="activity-logs">
+                    <div th:each="log : ${logsActivite}" class="log-item">
+                        <div class="log-icon">
+                            <i th:switch="${log.type}">
+                                <span th:case="'CONNEXION'">🔐</span>
+                                <span th:case="'MODIFICATION'">✏️</span>
+                                <span th:case="'CREATION'">➕</span>
+                                <span th:case="'SUPPRESSION'">🗑️</span>
+                                <span th:case="*">📝</span>
+                            </i>
+                        </div>
+                        <div class="log-content">
+                            <div class="log-message" th:text="${log.message}"></div>
+                            <div class="log-meta">
+                                <span th:text="${log.utilisateur}"></span> • 
+                                <span th:text="${#dates.format(log.date, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

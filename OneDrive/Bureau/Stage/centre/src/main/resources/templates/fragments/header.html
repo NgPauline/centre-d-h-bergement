@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle + ' - Centre d''Accueil'}">Centre d'Accueil</title>
+    
+    <!-- CSS principal -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    
+    <!-- Polices -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<header th:fragment="header" class="main-header">
+    <div class="header-content">
+        <!-- Logo et nom du centre -->
+        <div class="header-brand">
+            <span class="centre-icon">🏠</span>
+            <span class="centre-text">Centre d'Accueil</span>
+        </div>
+
+        <!-- Navigation horizontale -->
+        <nav th:if="${#authorization.expression('isAuthenticated()')}">
+            <ul class="nav-menu">
+                <!-- Alertes selon le rôle -->
+                <li sec:authorize="hasAnyRole('ADMIN', 'DIRECTEUR')">
+                    <a th:href="@{/alertes}" th:classappend="${activePage == '/alertes'} ? 'active'">
+                        🚨 Direction
+                    </a>
+                </li>
+
+                <li sec:authorize="hasRole('INFIRMIER')">
+                    <a th:href="@{/infirmier/alertes}" th:classappend="${activePage == '/infirmier/alertes'} ? 'active'">
+                        🚨 Médical
+                    </a>
+                </li>
+
+                <li sec:authorize="hasRole('AIDE_SOIGNANT')">
+                    <a th:href="@{/soins/alertes}" th:classappend="${activePage == '/soins/alertes'} ? 'active'">
+                        🚨 Soins
+                    </a>
+                </li>
+
+                <li sec:authorize="hasRole('SECRETAIRE')">
+                    <a th:href="@{/secretaire/alertes}" th:classappend="${activePage == '/secretaire/alertes'} ? 'active'">
+                        🚨 Admin
+                    </a>
+                </li>
+
+                <li sec:authorize="hasRole('COMPTABLE')">
+                    <a th:href="@{/comptable/alertes}" th:classappend="${activePage == '/comptable/alertes'} ? 'active'">
+                        🚨 Finances
+                    </a>
+                </li>
+
+                <!-- Résidents -->
+                <li sec:authorize="hasAnyRole('ADMIN', 'DIRECTEUR', 'SECRETAIRE', 'INFIRMIER', 'AIDE_SOIGNANT')">
+                    <a th:href="@{/residents}" th:classappend="${activePage == '/residents'} ? 'active'">
+                        👴 Résidents
+                    </a>
+                </li>
+
+                <!-- Chambres -->
+                <li sec:authorize="hasAnyRole('ADMIN', 'DIRECTEUR', 'SECRETAIRE')">
+                    <a th:href="@{/chambres}" th:classappend="${activePage == '/chambres'} ? 'active'">
+                        🏠 Chambres
+                    </a>
+                </li>
+
+                <!-- Personnel -->
+                <li sec:authorize="hasAnyRole('DIRECTEUR', 'SECRETAIRE')">
+                    <a th:href="@{/personnel/liste}" th:classappend="${activePage == 'personnel'} ? 'active'">
+                        👥 Personnel
+                    </a>
+                </li>
+
+                <!-- Médical -->
+                <li sec:authorize="hasRole('INFIRMIER')">
+                    <a th:href="@{/infirmier/medicaments}" th:classappend="${activePage == '/infirmier/medicaments'} ? 'active'">
+                        💊 Médicaments
+                    </a>
+                </li>
+
+                <!-- Messagerie -->
+                <li sec:authorize="isAuthenticated()">
+                    <a th:href="@{/messagerie}" th:classappend="${activePage == 'messagerie'} ? 'active'">
+                        ✉️ Messagerie
+                        <span class="badge badge-notification" th:if="${unreadCount != null && unreadCount > 0}" th:text="${unreadCount}"></span>
+                    </a>
+                </li>
+
+                <!-- Soins -->
+                <li sec:authorize="hasRole('AIDE_SOIGNANT')">
+                    <a th:href="@{/soins/quotidiens}" th:classappend="${activePage == '/soins/quotidiens'} ? 'active'">
+                        🛁 Soins
+                    </a>
+                </li>
+
+                <!-- Activités -->
+                <li sec:authorize="hasRole('EDUCATEUR')">
+                    <a th:href="@{/educateur/activites}" th:classappend="${activePage == '/educateur/activites'} ? 'active'">
+                        🎯 Activités
+                    </a>
+                </li>
+
+                <!-- Finances -->
+                <li sec:authorize="hasRole('COMPTABLE')">
+                    <a th:href="@{/comptable/factures}" th:classappend="${activePage == '/comptable/factures'} ? 'active'">
+                        💰 Finances
+                    </a>
+                </li>
+
+                <!-- Rapports -->
+                <li sec:authorize="hasAnyRole('ADMIN', 'DIRECTEUR', 'COMPTABLE')">
+                    <a th:href="@{/rapports}" th:classappend="${activePage == '/rapports'} ? 'active'">
+                        📈 Rapports
+                    </a>
+                </li>
+
+                <!-- Administration -->
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/utilisateurs}" th:classappend="${activePage == '/admin/utilisateurs'} ? 'active'">
+                        ⚙️ Admin
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Menu utilisateur déroulant -->
+        <div class="user-dropdown">
+            <div class="user-info-dropdown">
+                <div class="avatar" th:text="${#authentication.principal.username.substring(0,1).toUpperCase()}">U</div>
+                <div class="user-details">
+                    <span class="username" th:text="${#authentication.principal.username}">Utilisateur</span>
+                    <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">ROLE</span>
+                </div>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            
+            <!-- Menu déroulant -->
+            <div class="dropdown-menu">
+                <a th:href="@{/profil}" class="dropdown-item">
+                    <span class="dropdown-icon">👤</span>
+                    Modifier mon profil
+                </a>
+                <a th:href="@{/messagerie}" class="dropdown-item">
+                    <span class="dropdown-icon">✉️</span>
+                    Messagerie
+                    <span class="badge badge-notification-small" th:if="${unreadCount != null && unreadCount > 0}" th:text="${unreadCount}"></span>
+                </a>
+                <a th:href="@{/parametres}" class="dropdown-item">
+                    <span class="dropdown-icon">⚙️</span>
+                    Paramètres
+                </a>
+                <div class="dropdown-divider"></div>
+                <form th:action="@{/logout}" method="post" class="logout-form-dropdown">
+                    <button type="submit" class="dropdown-item logout-btn">
+                        <span class="dropdown-icon">🚪</span>
+                        Déconnexion
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+</body>
+</html>

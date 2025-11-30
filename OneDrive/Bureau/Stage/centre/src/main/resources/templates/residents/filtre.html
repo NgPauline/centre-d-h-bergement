@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Recherche Avancée Résidents</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🔍 Recherche Avancée - Résidents</h1>
+            <div class="header-actions">
+                <a th:href="@{/residents/liste}" class="btn btn-outline">
+                    ← Retour à la liste
+                </a>
+                <a th:href="@{/residents/nouveau}" class="btn btn-primary">
+                    ➕ Nouveau Résident
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="@{/residents/filtre}" method="get" class="filter-form">
+                    
+                    <!-- Filtres par critères de base -->
+                    <div class="form-section">
+                        <h3>🔎 Critères de Recherche</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom</label>
+                                <input type="text" id="nom" name="nom" class="form-control" 
+                                       placeholder="Rechercher par nom..." th:value="${param.nom}">
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom">Prénom</label>
+                                <input type="text" id="prenom" name="prenom" class="form-control" 
+                                       placeholder="Rechercher par prénom..." th:value="${param.prenom}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtres par statut et handicap -->
+                    <div class="form-section">
+                        <h3>🎯 Critères Spécifiques</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="typeHandicap">Type de handicap</label>
+                                <select id="typeHandicap" name="typeHandicap" class="form-control">
+                                    <option value="">Tous les types</option>
+                                    <option th:each="handicap : ${typesHandicap}" 
+                                            th:value="${handicap}" 
+                                            th:text="${handicap}"
+                                            th:selected="${param.typeHandicap == handicap}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="statut">Statut</label>
+                                <select id="statut" name="statut" class="form-control">
+                                    <option value="">Tous les statuts</option>
+                                    <option th:each="statut : ${statuts}" 
+                                            th:value="${statut}" 
+                                            th:text="${statut}"
+                                            th:selected="${param.statut == statut}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions des filtres -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Appliquer les filtres
+                        </button>
+                        <a th:href="@{/residents/filtre}" class="btn btn-outline">
+                            🗑️ Réinitialiser
+                        </a>
+                        <a th:href="@{/residents/liste}" class="btn btn-secondary">
+                            📋 Voir tous les résidents
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Résultats de la recherche filtrée -->
+        <div th:if="${resultats != null}" class="card" style="margin-top: 20px;">
+            <div class="card-body">
+                <div class="results-header">
+                    <h3>📊 Résultats de la recherche filtrée</h3>
+                    <div class="results-count">
+                        <span class="badge badge-info" th:text="${#lists.size(resultats)} + ' résultat(s) trouvé(s)'"></span>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(resultats)}" class="alert alert-info">
+                    Aucun résident ne correspond aux critères de recherche.
+                </div>
+
+                <div th:if="${!#lists.isEmpty(resultats)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Date Naissance</th>
+                                <th>Type Handicap</th>
+                                <th>Statut</th>
+                                <th>Chambre</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="resident : ${resultats}">
+                                <td th:text="${resident.nom}"></td>
+                                <td th:text="${resident.prenom}"></td>
+                                <td th:text="${#temporals.format(resident.dateNaissance, 'dd/MM/yyyy')}"></td>
+                                <td>
+                                    <span class="badge" th:text="${resident.typeHandicap} ?: 'Non spécifié'"></span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${resident.statut == 'ACTIF'} ? 'badge-success' : (${resident.statut == 'INACTIF'} ? 'badge-warning' : 'badge-secondary')"
+                                          th:text="${resident.statut}">
+                                    </span>
+                                </td>
+                                <td th:text="${resident.chambre?.numero} ?: 'Non assigné'"></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a th:href="@{/residents/{id}(id=${resident.id})}" 
+                                           class="btn btn-sm btn-outline" title="Voir détails">
+                                            👁️
+                                        </a>
+                                        <a th:href="@{/residents/{id}/modifier(id=${resident.id})}" 
+                                           class="btn btn-sm btn-primary" title="Modifier">
+                                            ✏️
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

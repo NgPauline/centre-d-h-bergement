@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Dossiers Médicaux - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Dossiers Médicaux</h1>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Sélection du résident -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Sélectionner un Résident</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/infirmier/dossiers-medicaux/selectionner}" method="get" class="filter-form">
+                    <div class="form-group">
+                        <label for="residentId">Résident:</label>
+                        <select id="residentId" name="residentId" required class="form-control">
+                            <option value="">Sélectionnez un résident</option>
+                            <!-- CORRECTION: Utiliser residentInfo.resident -->
+                            <option th:each="residentInfo : ${residents}" 
+                                    th:value="${residentInfo.resident.id}" 
+                                    th:text="${residentInfo.resident.nom + ' ' + residentInfo.resident.prenom}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Voir le dossier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Liste des résidents avec statut dossier -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Liste des Résidents</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Date de Naissance</th>
+                                <th>Chambre</th>
+                                <th>Statut Dossier</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- CORRECTION: Utiliser residentInfo au lieu de resident -->
+                            <tr th:each="residentInfo : ${residents}">
+                                <td th:text="${residentInfo.resident.nom}"></td>
+                                <td th:text="${residentInfo.resident.prenom}"></td>
+                                <td th:text="${#temporals.format(residentInfo.resident.dateNaissance, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${residentInfo.resident.chambre}"></td>
+                                <td>
+                                    <!-- CORRECTION: Utiliser residentInfo.hasDossier au lieu d'appeler le repository -->
+                                    <span th:if="${residentInfo.hasDossier}" 
+                                          class="badge badge-success">Dossier existant</span>
+                                    <span th:if="${not residentInfo.hasDossier}" 
+                                          class="badge badge-warning">À créer</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- CORRECTION: Utiliser residentInfo.hasDossier -->
+                                        <a th:if="${residentInfo.hasDossier}"
+                                           th:href="@{/infirmier/dossiers-medicaux/{id}(id=${residentInfo.resident.id})}"
+                                           class="btn btn-sm btn-primary">
+                                            👁️ Voir dossier
+                                        </a>
+                                        <!-- CORRECTION: Utiliser residentInfo.hasDossier -->
+                                        <a th:if="${not residentInfo.hasDossier}"
+                                           th:href="@{/infirmier/dossiers-medicaux/creer/{id}(id=${residentInfo.resident.id})}"
+                                           class="btn btn-sm btn-success">
+                                            📝 Créer dossier
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title>Consultations Médicales - Centre d'Hébergement</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/infirmier.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Consultations Médicales</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i>🩺</i> Nouvelle Consultation
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card warning" onclick="filterByType('futures')">
+                <div class="stat-number" id="futureCount">0</div>
+                <div class="stat-label">À venir</div>
+            </div>
+            <div class="stat-card danger" onclick="filterByType('urgence')">
+                <div class="stat-number" id="urgentCount">0</div>
+                <div class="stat-label">Urgences</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" id="todayCount">0</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label>Type:</label>
+                <select id="typeFilter" onchange="loadConsultations()">
+                    <option value="">Tous les types</option>
+                    <option value="ROUTINE">Routine</option>
+                    <option value="URGENCE">Urgence</option>
+                    <option value="SPECIALISTE">Spécialiste</option>
+                    <option value="EXTERNE">Externe</option>
+                    <option value="SUIVI">Suivi</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Résident:</label>
+                <select id="residentFilter" onchange="loadConsultations()">
+                    <option value="">Tous les résidents</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Période:</label>
+                <select id="periodFilter" onchange="loadConsultations()">
+                    <option value="all">Toutes</option>
+                    <option value="futures">À venir</option>
+                    <option value="today">Aujourd'hui</option>
+                    <option value="urgence">Urgences</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Calendrier/Liste -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Planning des Consultations</h3>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="toggleView()">
+                        <i id="viewIcon">📅</i> <span id="viewText">Vue calendrier</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Vue liste -->
+                <div id="listView">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Résident</th>
+                                <th>Type</th>
+                                <th>Motif</th>
+                                <th>Médecin</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consultationsTableBody">
+                            <!-- Chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Vue calendrier -->
+                <div id="calendarView" style="display: none;">
+                    <div class="calendar-header">
+                        <button class="btn btn-outline" onclick="changeMonth(-1)">←</button>
+                        <h4 id="currentMonth"></h4>
+                        <button class="btn btn-outline" onclick="changeMonth(1)">→</button>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Consultation -->
+    <div id="consultationModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nouvelle Consultation</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="consultationForm" onsubmit="submitConsultationForm(event)">
+                    <input type="hidden" id="consultationId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="residentId">Résident *</label>
+                            <select id="residentId" required>
+                                <option value="">Sélectionnez un résident</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Type *</label>
+                            <select id="type" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="ROUTINE">Routine</option>
+                                <option value="URGENCE">Urgence</option>
+                                <option value="SPECIALISTE">Spécialiste</option>
+                                <option value="EXTERNE">Externe</option>
+                                <option value="SUIVI">Suivi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateHeure">Date et heure *</label>
+                            <input type="datetime-local" id="dateHeure" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="urgence">
+                                <input type="checkbox" id="urgence"> Urgence
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motif">Motif de la consultation *</label>
+                        <textarea id="motif" rows="2" required placeholder="Raison de la consultation..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="medecin">Médecin</label>
+                            <input type="text" id="medecin" placeholder="Nom du médecin">
+                        </div>
+                        <div class="form-group">
+                            <label for="specialite">Spécialité</label>
+                            <input type="text" id="specialite" placeholder="Spécialité médicale">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observations">Observations</label>
+                        <textarea id="observations" rows="3" placeholder="Observations pré-consultation..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Compte Rendu -->
+    <div id="compteRenduModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Compte Rendu Médical</h3>
+                <span class="close" onclick="closeCompteRenduModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="consultation-info">
+                    <h4 id="crResident"></h4>
+                    <p><strong>Date:</strong> <span id="crDate"></span></p>
+                    <p><strong>Motif:</strong> <span id="crMotif"></span></p>
+                </div>
+
+                <form onsubmit="generateCompteRendu(event)">
+                    <input type="hidden" id="crConsultationId">
+                    
+                    <div class="form-group">
+                        <label for="diagnostic">Diagnostic</label>
+                        <textarea id="diagnostic" rows="3" placeholder="Diagnostic établi..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="traitementPrescrit">Traitement prescrit</label>
+                        <textarea id="traitementPrescrit" rows="3" placeholder="Traitement médicamenteux ou autres..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compteRendu">Compte rendu détaillé</label>
+                        <textarea id="compteRendu" rows="5" placeholder="Compte rendu complet de la consultation..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeCompteRenduModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Générer le compte rendu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

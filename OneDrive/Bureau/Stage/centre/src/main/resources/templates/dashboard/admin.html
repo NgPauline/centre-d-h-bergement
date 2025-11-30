@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard/admin.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">⚙️ Tableau de bord - Administration Système</h1>
+            <div class="user-info">
+                <span class="user-role" th:text="${#authentication.principal.authorities[0].authority}">Rôle</span>
+                <span class="user-name" th:text="${#authentication.principal.username}">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Admin -->
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Vue d'ensemble du système</h2>
+                <div class="stats-grid admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" th:text="${stats.totalResidents}">-</div>
+                        <div class="stat-label">Résidents total</div>
+                        <div class="stat-sub" th:text="${stats.residentsActifs} + ' actifs'">- actifs</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-number" th:text="${stats.totalChambres}">-</div>
+                        <div class="stat-label">Chambres</div>
+                        <div class="stat-sub" th:text="${stats.chambresDisponibles} + ' disponibles'">- disponibles</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-number" th:text="${stats.totalPersonnel}">-</div>
+                        <div class="stat-label">Personnel</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-number" th:text="${stats.facturesEnRetard}">-</div>
+                        <div class="stat-label">Factures en retard</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <h3>Actions administratives système</h3>
+                <div class="quick-actions">
+                    <a href="/admin/utilisateurs" class="btn btn-primary">
+                        <i>👤</i> Gestion utilisateurs
+                    </a>
+                    <a href="/system/configuration" class="btn btn-warning">
+                        <i>⚙️</i> Configuration système
+                    </a>
+                    <a href="/admin/audit" class="btn btn-success">
+                        <i>📋</i> Logs et audit
+                    </a>
+                    <a href="/system/sauvegarde" class="btn btn-danger">
+                        <i>💾</i> Sauvegarde
+                    </a>
+                </div>
+            </div>
+
+            <!-- Section monitoring système -->
+            <div class="system-monitoring">
+                <h3>🖥️ Monitoring système</h3>
+                <div class="monitoring-grid">
+                    <div class="monitoring-item">
+                        <span class="monitoring-label">Utilisateurs connectés</span>
+                        <span class="monitoring-value">3</span>
+                    </div>
+                    <div class="monitoring-item">
+                        <span class="monitoring-label">Performance BD</span>
+                        <span class="monitoring-value good">✅ Optimale</span>
+                    </div>
+                    <div class="monitoring-item">
+                        <span class="monitoring-label">Espace disque</span>
+                        <span class="monitoring-value warning">⚠️ 75% utilisé</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

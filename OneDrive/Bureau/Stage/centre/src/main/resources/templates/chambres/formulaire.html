@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head">
+    <title th:text="${chambre.id != null} ? 'Modifier Chambre' : 'Nouvelle Chambre'">Formulaire Chambre</title>
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/formulaire.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" th:text="${chambre.id != null} ? 'Modifier la Chambre' : 'Nouvelle Chambre'"></h1>
+            <a th:href="@{/chambres/liste}" class="btn btn-outline">
+                ← Retour à la liste
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="${chambre.id != null} ? @{/chambres/{id}/modifier(id=${chambre.id})} : @{/chambres/nouvelle}" 
+                      method="post" th:object="${chambre}">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numero">Numéro *</label>
+                            <input type="text" id="numero" th:field="*{numero}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="etage">Étage *</label>
+                            <input type="number" id="etage" th:field="*{etage}" min="0" max="10" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type">Type de chambre *</label>
+                            <select id="type" th:field="*{type}" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option th:each="type : ${typesChambre}" 
+                                        th:value="${type}" 
+                                        th:text="${type}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="capacite">Capacité *</label>
+                            <input type="number" id="capacite" th:field="*{capacite}" min="1" max="4" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" th:field="*{description}" rows="3" 
+                                  placeholder="Équipements, particularités..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="accessible" th:field="*{accessible}">
+                            <span class="checkmark"></span>
+                            Chambre accessible aux personnes à mobilité réduite
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/chambres/liste}" class="btn btn-outline">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <span th:text="${chambre.id != null} ? 'Modifier' : 'Créer la chambre'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script th:src="@{/js/chambres.js}"></script>
+</body>
+</html>

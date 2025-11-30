@@ -1,0 +1,174 @@
+@import url('base/variables.css');
+@import url('base/style.css');
+@import url('base/utilities.css');
+@import url('components/cards.css');
+@import url('components/buttons.css');
+@import url('pages/dashboard.css');
+
+/* Dashboard commun */
+.dashboard-content {
+    width: 100%;
+}
+
+.dashboard-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-section h2 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+}
+
+.user-info {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.user-role {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 1rem;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.user-name {
+    color: #666;
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+/* Actions rapides */
+.dashboard-actions {
+    margin: var(--spacing-xl) 0;
+}
+
+.dashboard-actions h3 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+}
+
+.quick-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.quick-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    flex: 1;
+    min-width: 150px;
+    justify-content: center;
+}
+
+/* Monitoring système */
+.system-monitoring, .performance-metrics {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+    margin-top: var(--spacing-lg);
+}
+
+.monitoring-grid, .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.monitoring-item, .metric-item {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: #f8f9fa;
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid #667eea;
+}
+
+.monitoring-label, .metric-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: #666;
+    margin-bottom: var(--spacing-sm);
+}
+
+.monitoring-value, .metric-value {
+    display: block;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.monitoring-value.good { color: var(--status-available); }
+.monitoring-value.warning { color: var(--status-occupied); }
+.monitoring-value.danger { color: var(--status-full); }
+
+/* Alertes financières */
+.financial-alerts, .urgent-tasks, .today-activities, .care-schedule {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+    margin-top: var(--spacing-lg);
+}
+
+.alert-list, .task-list, .activity-list, .schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.task-item, .activity-item, .schedule-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    border-left: 4px solid #6c757d;
+}
+
+.task-item.urgent, .schedule-item.urgent {
+    border-left-color: var(--status-full);
+    background: #fff5f5;
+}
+
+.activity-time, .schedule-time {
+    font-weight: 600;
+    color: #495057;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.task-priority.high { color: var(--status-full); }
+.task-priority.medium { color: var(--status-occupied); }
+.task-priority.low { color: var(--status-available); }
+
+/* Responsive Dashboard */
+@media (max-width: 768px) {
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .monitoring-grid, .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}

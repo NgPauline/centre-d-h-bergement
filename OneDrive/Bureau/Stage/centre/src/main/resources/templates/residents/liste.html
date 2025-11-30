@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/header :: head">
+    <title>Liste des Résidents</title>
+    <link rel="stylesheet" th:href="@{/css/base/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/chambres/liste.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">👴 Liste des Résidents</h1>
+            <a th:href="@{/residents/nouveau}" class="btn btn-primary">
+                <i>➕</i> Nouveau Résident
+            </a>
+        </div>
+
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Barre de recherche CORRIGÉE -->
+        <div class="card search-card residents">
+            <div class="card-body">
+                <form th:action="@{/residents}" method="get" class="search-form">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <select name="searchType" class="search-select">
+                                <option value="">Tous les champs</option>
+                                <option value="nom" th:selected="${param.searchType == 'nom'}">Nom</option>
+                                <option value="prenom" th:selected="${param.searchType == 'prenom'}">Prénom</option>
+                                <option value="numeroNational" th:selected="${param.searchType == 'numeroNational'}">Numéro National</option>
+                                <option value="chambre" th:selected="${param.searchType == 'chambre'}">Chambre</option>
+                            </select>
+                            <input type="text" 
+                                   name="search" 
+                                   class="search-input" 
+                                   placeholder="Rechercher..." 
+                                   th:value="${param.search}">
+                            <button type="submit" class="btn btn-primary search-btn">
+                                🔍 Rechercher
+                            </button>
+                        </div>
+                        <div th:if="${param.search != null and param.search != ''}" class="search-results-info">
+                            <span th:text="${#lists.size(residents)} + ' résultat(s) trouvé(s)'"></span>
+                            <a th:href="@{/residents}" class="btn btn-sm btn-outline">
+                                ❌ Effacer la recherche
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Résidents enregistrés</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Date Naissance</th>
+                                <th>Type Handicap</th>
+                                <th>Statut</th>
+                                <th>Chambre</th>
+                                <th>Dossier Médical</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="resident : ${residents}">
+                                <td th:text="${resident.nom}"></td>
+                                <td th:text="${resident.prenom}"></td>
+                                <td>
+                                    <span th:if="${resident.dateNaissance != null}" 
+                                          th:text="${#temporals.format(resident.dateNaissance, 'dd/MM/yyyy')}">
+                                    </span>
+                                    <span th:if="${resident.dateNaissance == null}" class="text-muted">
+                                        Non renseignée
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:text="${resident.typeHandicap} ?: 'Non spécifié'"></span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${resident.statut == 'ACTIF'} ? 'badge-success' : 
+                                                         (${resident.statut == 'INACTIF'} ? 'badge-warning' : 'badge-secondary')"
+                                          th:text="${resident.statut} ?: 'ACTIF'">
+                                    </span>
+                                </td>
+                                <td th:text="${resident.chambre?.numero} ?: 'Non assigné'"></td>
+                                <td>
+                                    <span th:if="${resident.dossierMedical != null}" 
+                                          class="badge badge-success">📋 Dossier existant</span>
+                                    <span th:if="${resident.dossierMedical == null}" 
+                                          class="badge badge-warning">📝 À créer</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- Voir détails - Visible par tous -->
+                                        <a th:href="@{/residents/{id}(id=${resident.id})}" 
+                                           class="btn btn-sm btn-outline" title="Voir détails">
+                                            👁️
+                                        </a>
+                                        
+                                        <!-- Dossier médical - Visible pour INFIRMIER et DIRECTEUR -->
+                                        <a th:if="${resident.dossierMedical != null and #authorization.expression('hasAnyRole(''INFIRMIER'', ''DIRECTEUR'')')}"
+                                           th:href="@{/infirmier/dossiers-medicaux/{id}(id=${resident.dossierMedical.id})}" 
+                                           class="btn btn-sm btn-info" title="Dossier médical">
+                                            🏥
+                                        </a>
+                                        
+                                        <!-- Création dossier - Réservée aux INFIRMIER seulement -->
+                                        <a th:if="${resident.dossierMedical == null and #authorization.expression('hasRole(''INFIRMIER'')')}"
+                                           th:href="@{/infirmier/dossiers-medicaux/creer/{id}(id=${resident.id})}" 
+                                           class="btn btn-sm btn-success" title="Créer dossier">
+                                            📋
+                                        </a>
+                                        
+                                        <!-- Modification - Visible par ADMIN, DIRECTEUR, SECRETAIRE -->
+                                        <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''DIRECTEUR'', ''SECRETAIRE'')')}"
+                                           th:href="@{/residents/{id}/modifier(id=${resident.id})}" 
+                                           class="btn btn-sm btn-primary" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        
+                                        <!-- Suppression - Réservée à ADMIN et DIRECTEUR -->
+                                        <form th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''DIRECTEUR'')')}"
+                                              th:action="@{/residents/{id}/supprimer(id=${resident.id})}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le résident ' + '${resident.prenom} ${resident.nom}' + ' ?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(residents)}">
+                                <td colspan="8" class="text-center text-muted">
+                                    <div th:if="${param.search != null and param.search != ''}">
+                                        Aucun résident trouvé pour votre recherche
+                                    </div>
+                                    <div th:if="${param.search == null or param.search == ''}">
+                                        Aucun résident enregistré
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
